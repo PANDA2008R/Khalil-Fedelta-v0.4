@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Khalil Fedeltà — Pulizia, Macchine e Prodotti Professionali</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="icon">🧴</span>
+    <div>Khalil<span class="fedelta">Fedeltà</span></div>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#categorie">Prodotti</a></li>
+      <li><a href="#servizi">Servizi</a></li>
+      <li><a href="#contatti">Contatti</a></li>
+    </ul>
+  </nav>
+  <div class="header-icons">
+    <div class="icon-btn" id="searchToggle" data-tip="Cerca un prodotto">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="icon-btn" id="cartBtn" data-tip="Il tuo carrello">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      <span class="badge" id="cartCount">0</span>
+    </div>
+  </div>
+</header>
+
+<!-- Search overlay bar -->
+<div class="search-panel" id="searchPanel">
+  <div class="search-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cerca un prodotto (es. detersivo, scopa, aspirapolvere...)">
+    <button id="searchClose">&times;</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <span class="eyebrow">Firenze del Nord Milano &middot; Dal Cuore Italiano</span>
+    <h1>Pulizia Professionale, <span class="accent">Fatta Bene.</span></h1>
+    <p class="sub">Servizi a domicilio, macchine, attrezzi e prodotti per la pulizia — tutto in un unico negozio.</p>
+  </div>
+
+  <div class="carousel" id="carousel">
+    <div class="carousel-track" id="carouselTrack"></div>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </div>
+</section>
+
+<section class="section" id="categorie">
+  <div class="section-title">
+    <span>Esplora</span>
+    <h2>Le Nostre Categorie</h2>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-cat="macchine">🛠️ Macchine di Pulizia</button>
+    <button class="tab-btn" data-cat="attrezzi">🧹 Attrezzi di Pulizia</button>
+    <button class="tab-btn" data-cat="liquidi">🧴 Prodotti Liquidi</button>
+  </div>
+
+  <div class="prod-grid" id="productGrid"></div>
+  <div class="pagination" id="pagination"></div>
+</section>
+
+<section class="section" id="servizi" style="background:var(--surface2);">
+  <div class="section-title">
+    <span>Cosa Offriamo</span>
+    <h2>Servizi a Domicilio</h2>
+  </div>
+  <div class="serv-grid" id="servGrid"></div>
+</section>
+
+<footer id="contatti">
+  <div class="logo" style="justify-content:center;">🧴 Khalil<span class="fedelta">Fedeltà</span></div>
+  <p>📍 Via Giuseppe Garibaldi 41, Pogliano Milanese (MI)</p>
+  <p>📞 WhatsApp: +39 393 402 0090</p>
+  <p style="margin-top:10px;">© 2026 Khalil Fedeltà — Tutti i diritti riservati</p>
+</footer>
+
+<a class="whatsapp-fab" id="whatsappFab" href="#" title="WhatsApp" target="_blank" rel="noopener">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-5.9c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.6.1s-.6.8-.8 1c-.1.2-.3.2-.5.1-1.4-.7-2.3-1.3-3.2-2.8-.2-.4.2-.4.6-1.2.1-.2 0-.4 0-.5s-.6-1.5-.8-2c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3z"/></svg>
+</a>
+
+<div class="overlay" id="overlay"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-head">
+    <h3>Il Tuo Ordine</h3>
+    <button id="closeCart">&times;</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="cart-row"><span>Subtotale</span><span id="cartSubtotal">€0</span></div>
+    <div class="cart-total"><span>Totale</span><span id="cartTotal">€0</span></div>
+    <button class="checkout-btn ripple-btn" id="checkoutBtn">Conferma Ordine su WhatsApp</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
