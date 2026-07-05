@@ -89,7 +89,7 @@ if(featured.length > 1){
   setInterval(() => {
     slideIndex = (slideIndex + 1) % featured.length;
     goToSlide(slideIndex);
-  }, 2000);
+  }, 4000);
 }
 
 track.addEventListener('click', e => {
