@@ -22,7 +22,7 @@ const products = [
   {id:3, name:"Lucidatrice Pavimenti", cat:"macchine", price:280, oldPrice:320, desc:"Risultato lucido professionale su marmo e gres.", icon:"✨", image:null, badge:"offerta"},
   {id:4, name:"Idropulitrice Alta Pressione", cat:"macchine", price:190, oldPrice:null, desc:"Ideale per esterni, cortili e facciate.", icon:"💦", image:null, badge:null},
   {id:5, name:"Monospazzola Professionale", cat:"macchine", price:410, oldPrice:null, desc:"Per la manutenzione di grandi superfici commerciali.", icon:"⚙️", image:null, badge:null},
-{id:3, name:"Scopa Hygiene", cat:"macchine", price:25, oldPrice:50, desc:"Scopa Hygiene studiata per ambienti alimentari, bar e cucine. Realizzata con setole non piumate per ridurre.", icon:"null", image:https://www.3gsrl.com/picture-shop/ec140df0-dfa0-4cde-aace-ddd9150c24f5?w=700&q=90, badge:"offerta"},
+{id:6, name:"Scopa Hygiene", cat:"macchine", price:25, oldPrice:50, desc:"Scopa Hygiene studiata per ambienti alimentari, bar e cucine. Realizzata con setole non piumate per ridurre.", icon:"null", image:https://www.3gsrl.com/picture-shop/ec140df0-dfa0-4cde-aace-ddd9150c24f5?w=700&q=90, badge:"offerta"},
    
   // --- Attrezzi di Pulizia ---
   {id:6, name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", image:null, badge:null},
