@@ -37,7 +37,7 @@ const products = [
   {id:13, name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", image:null, badge:"bestseller"},
   {id:14, name:"Sgrassatore Professionale", cat:"liquidi", price:9, oldPrice:12, desc:"Formula concentrata per cucine e officine.", icon:"🧴", image:null, badge:"offerta"},
   {id:15, name:"Detergente Pavimenti", cat:"liquidi", price:8, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:null, badge:null},
-     {id:16, name:"scopa", cat:"liquidi", price:52, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:https://ibb.co/RpsjNZLS, badge:null},
+     {id:16, name:"scopa", cat:"liquidi", price:52, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:<a href="https://ibb.co/RpsjNZLS"><img src="https://i.ibb.co/Gv8H9BgJ/scopa-professionale-hygiene-plus-haccp.jpg" alt="scopa-professionale-hygiene-plus-haccp" border="0"></a>, badge:null},
 ];
 
 /* الخدمات المنزلية */
