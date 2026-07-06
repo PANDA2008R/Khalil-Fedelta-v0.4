@@ -22,8 +22,9 @@ const products = [
   {id:3, name:"Lucidatrice Pavimenti", cat:"macchine", price:280, oldPrice:320, desc:"Risultato lucido professionale su marmo e gres.", icon:"✨", image:null, badge:"offerta"},
   {id:4, name:"Idropulitrice Alta Pressione", cat:"macchine", price:190, oldPrice:null, desc:"Ideale per esterni, cortili e facciate.", icon:"💦", image:null, badge:null},
   {id:5, name:"Monospazzola Professionale", cat:"macchine", price:410, oldPrice:null, desc:"Per la manutenzione di grandi superfici commerciali.", icon:"⚙️", image:null, badge:null},
-{id:6, name:"Scopa Hygiene", cat:"macchine", price:25, oldPrice:50, desc:"Scopa Hygiene studiata per ambienti alimentari, bar e cucine. Realizzata con setole non piumate per ridurre.", image:https://www.rausasrl.it/7045/scopa-professionale-hygiene-plus-haccp.jpg , badge:null},
-  // --- Attrezzi di Pulizia ---
+{id:16, name:"Scopa Hygiene", cat:"macchine", price:25, oldPrice:50, desc:"Scopa Hygiene studiata per ambienti alimentari, bar e cucine. Realizzata con setole non piumate per ridurre.", image:https://www.rausasrl.it/7045/scopa-professionale-hygiene-plus-haccp.jpg , badge:null},
+ 
+   // --- Attrezzi di Pulizia ---
   {id:6, name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", image:null, badge:null},
   {id:7, name:"Mocio con Secchio e Strizzatore", cat:"attrezzi", price:28, oldPrice:null, desc:"Sistema completo con panno in microfibra lavabile.", icon:"🪣", image:null, badge:"bestseller"},
   {id:8, name:"Paletta e Scopino", cat:"attrezzi", price:8, oldPrice:null, desc:"Set pratico per la pulizia quotidiana.", icon:"🧺", image:null, badge:null},
