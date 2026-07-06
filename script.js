@@ -396,9 +396,22 @@ document.getElementById('whatsappFab').href =
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Ciao ' + STORE_NAME + '! Vorrei maggiori informazioni.')}`;
 
 /* ============================================
-   تأثير Ripple عام — يشتغل على أي زرار عليه class="ripple-btn"
-   حتى لو اتضاف بعد كده ديناميكيًا
+   قائمة الموبايل (الهامبرغر ☰)
    ============================================ */
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const mobileNav = document.getElementById('mobileNav');
+
+hamburgerBtn.addEventListener('click', () => {
+  hamburgerBtn.classList.toggle('open');
+  mobileNav.classList.toggle('open');
+});
+
+mobileNav.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburgerBtn.classList.remove('open');
+    mobileNav.classList.remove('open');
+  });
+});
 document.addEventListener('click', e => {
   const btn = e.target.closest('.ripple-btn');
   if(!btn) return;
