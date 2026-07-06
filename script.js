@@ -23,8 +23,7 @@ const products = [
   {id:4, name:"Idropulitrice Alta Pressione", cat:"macchine", price:190, oldPrice:null, desc:"Ideale per esterni, cortili e facciate.", icon:"💦", image:null, badge:null},
   {id:5, name:"Monospazzola Professionale", cat:"macchine", price:410, oldPrice:null, desc:"Per la manutenzione di grandi superfici commerciali.", icon:"⚙️", image:null, badge:null},
 
- 
-   // --- Attrezzi di Pulizia ---
+  // --- Attrezzi di Pulizia ---
   {id:6, name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", image:null, badge:null},
   {id:7, name:"Mocio con Secchio e Strizzatore", cat:"attrezzi", price:28, oldPrice:null, desc:"Sistema completo con panno in microfibra lavabile.", icon:"🪣", image:null, badge:"bestseller"},
   {id:8, name:"Paletta e Scopino", cat:"attrezzi", price:8, oldPrice:null, desc:"Set pratico per la pulizia quotidiana.", icon:"🧺", image:null, badge:null},
@@ -37,7 +36,6 @@ const products = [
   {id:13, name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", image:null, badge:"bestseller"},
   {id:14, name:"Sgrassatore Professionale", cat:"liquidi", price:9, oldPrice:12, desc:"Formula concentrata per cucine e officine.", icon:"🧴", image:null, badge:"offerta"},
   {id:15, name:"Detergente Pavimenti", cat:"liquidi", price:8, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:null, badge:null},
-     {id:16, name:"scopa", cat:"liquidi", price:52, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:"https://www.rausasrl.it/7045/scopa-professionale-hygiene-plus-haccp.jpg", badge:null},
 ];
 
 /* الخدمات المنزلية */
