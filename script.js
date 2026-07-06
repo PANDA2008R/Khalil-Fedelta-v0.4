@@ -8,29 +8,34 @@ const STORE_NAME = "Khalil Fedeltà";
    بيانات المنتجات
    عايز تضيف منتج جديد؟ انسخ سطر وغيّر البيانات:
    {id: رقم_فريد, name:"الاسم", cat:"macchine|attrezzi|liquidi",
-    price: السعر, desc:"الوصف", icon:"🛠️", badge:"offerta"|"bestseller"|null}
+    price: السعر, oldPrice: السعر_قبل_العرض_أو_null,
+    desc:"الوصف", icon:"🛠️", image:"رابط الصورة أو null",
+    badge:"offerta"|"bestseller"|null}
+
+   لو عندك صورة حقيقية: حط رابطها في image، وهي هتظهر بدل الإيموجي تلقائي.
+   لو مفيش صورة: سيب image: null وهيستخدم الإيموجي اللي في icon.
    ============================================ */
 const products = [
   // --- Macchine di Pulizia ---
-  {id:1, name:"Lavapavimenti Professionale", cat:"macchine", price:320, oldPrice:null, desc:"Lava e asciuga pavimenti in un solo passaggio, uso professionale.", icon:"🧽", badge:"bestseller"},
-  {id:2, name:"Aspirapolvere Industriale", cat:"macchine", price:250, oldPrice:null, desc:"Potenza elevata per grandi ambienti e cantieri.", icon:"🔌", badge:null},
-  {id:3, name:"Lucidatrice Pavimenti", cat:"macchine", price:280, oldPrice:320, desc:"Risultato lucido professionale su marmo e gres.", icon:"✨", badge:"offerta"},
-  {id:4, name:"Idropulitrice Alta Pressione", cat:"macchine", price:190, oldPrice:null, desc:"Ideale per esterni, cortili e facciate.", icon:"💦", badge:null},
-  {id:5, name:"Monospazzola Professionale", cat:"macchine", price:410, oldPrice:null, desc:"Per la manutenzione di grandi superfici commerciali.", icon:"⚙️", badge:null},
+  {id:1, name:"Lavapavimenti Professionale", cat:"macchine", price:320, oldPrice:null, desc:"Lava e asciuga pavimenti in un solo passaggio, uso professionale.", icon:"🧽", image:null, badge:"bestseller"},
+  {id:2, name:"Aspirapolvere Industriale", cat:"macchine", price:250, oldPrice:null, desc:"Potenza elevata per grandi ambienti e cantieri.", icon:"🔌", image:null, badge:null},
+  {id:3, name:"Lucidatrice Pavimenti", cat:"macchine", price:280, oldPrice:320, desc:"Risultato lucido professionale su marmo e gres.", icon:"✨", image:null, badge:"offerta"},
+  {id:4, name:"Idropulitrice Alta Pressione", cat:"macchine", price:190, oldPrice:null, desc:"Ideale per esterni, cortili e facciate.", icon:"💦", image:null, badge:null},
+  {id:5, name:"Monospazzola Professionale", cat:"macchine", price:410, oldPrice:null, desc:"Per la manutenzione di grandi superfici commerciali.", icon:"⚙️", image:null, badge:null},
 
   // --- Attrezzi di Pulizia ---
-  {id:6, name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", badge:null},
-  {id:7, name:"Mocio con Secchio e Strizzatore", cat:"attrezzi", price:28, oldPrice:null, desc:"Sistema completo con panno in microfibra lavabile.", icon:"🪣", badge:"bestseller"},
-  {id:8, name:"Paletta e Scopino", cat:"attrezzi", price:8, oldPrice:null, desc:"Set pratico per la pulizia quotidiana.", icon:"🧺", badge:null},
-  {id:9, name:"Spazzolone per Esterni", cat:"attrezzi", price:19, oldPrice:24, desc:"Manico lungo, ideale per cortili e garage.", icon:"🧽", badge:"offerta"},
-  {id:10, name:"Set Panni Microfibra (x10)", cat:"attrezzi", price:12, oldPrice:null, desc:"Panni professionali per vetri e superfici delicate.", icon:"🧻", badge:null},
+  {id:6, name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", image:null, badge:null},
+  {id:7, name:"Mocio con Secchio e Strizzatore", cat:"attrezzi", price:28, oldPrice:null, desc:"Sistema completo con panno in microfibra lavabile.", icon:"🪣", image:null, badge:"bestseller"},
+  {id:8, name:"Paletta e Scopino", cat:"attrezzi", price:8, oldPrice:null, desc:"Set pratico per la pulizia quotidiana.", icon:"🧺", image:null, badge:null},
+  {id:9, name:"Spazzolone per Esterni", cat:"attrezzi", price:19, oldPrice:24, desc:"Manico lungo, ideale per cortili e garage.", icon:"🧽", image:null, badge:"offerta"},
+  {id:10, name:"Set Panni Microfibra (x10)", cat:"attrezzi", price:12, oldPrice:null, desc:"Panni professionali per vetri e superfici delicate.", icon:"🧻", image:null, badge:null},
 
   // --- Prodotti Liquidi ---
-  {id:11, name:"Detersivo Multiuso", cat:"liquidi", price:6, oldPrice:null, desc:"Sgrassatore professionale per ogni superficie.", icon:"🧴", badge:null},
-  {id:12, name:"Ammoniaca Concentrata", cat:"liquidi", price:5, oldPrice:null, desc:"Azione sgrassante rapida ed efficace.", icon:"🧪", badge:null},
-  {id:13, name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", badge:"bestseller"},
-  {id:14, name:"Sgrassatore Professionale", cat:"liquidi", price:9, oldPrice:12, desc:"Formula concentrata per cucine e officine.", icon:"🧴", badge:"offerta"},
-  {id:15, name:"Detergente Pavimenti", cat:"liquidi", price:8, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", badge:null},
+  {id:11, name:"Detersivo Multiuso", cat:"liquidi", price:6, oldPrice:null, desc:"Sgrassatore professionale per ogni superficie.", icon:"🧴", image:null, badge:null},
+  {id:12, name:"Ammoniaca Concentrata", cat:"liquidi", price:5, oldPrice:null, desc:"Azione sgrassante rapida ed efficace.", icon:"🧪", image:null, badge:null},
+  {id:13, name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", image:null, badge:"bestseller"},
+  {id:14, name:"Sgrassatore Professionale", cat:"liquidi", price:9, oldPrice:12, desc:"Formula concentrata per cucine e officine.", icon:"🧴", image:null, badge:"offerta"},
+  {id:15, name:"Detergente Pavimenti", cat:"liquidi", price:8, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:null, badge:null},
 ];
 
 /* الخدمات المنزلية */
@@ -59,6 +64,9 @@ let slideIndex = 0;
 featured.forEach((p, i) => {
   const slide = document.createElement('div');
   slide.className = 'slide';
+  const media = p.image
+    ? `<img src="${p.image}" alt="${p.name}">`
+    : p.icon;
   slide.innerHTML = `
     <div class="info">
       <span class="badge-tag ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Più Venduto'}</span>
@@ -69,28 +77,82 @@ featured.forEach((p, i) => {
       </div>
       <button data-id="${p.id}" class="carousel-add ripple-btn">Aggiungi al Carrello</button>
     </div>
-    <div class="icon-big">${p.icon}</div>
+    <div class="icon-big">${media}</div>
   `;
   track.appendChild(slide);
 
   const dot = document.createElement('div');
   dot.className = 'dot' + (i === 0 ? ' active' : '');
-  dot.addEventListener('click', () => goToSlide(i));
   dotsWrap.appendChild(dot);
 });
 
 function goToSlide(i){
-  slideIndex = i;
-  track.style.transform = `translateX(-${i * 100}%)`;
-  document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+  slideIndex = (i + featured.length) % featured.length;
+  track.style.transform = `translateX(-${slideIndex * 100}%)`;
+  document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('active', idx === slideIndex));
 }
 
-if(featured.length > 1){
-  setInterval(() => {
-    slideIndex = (slideIndex + 1) % featured.length;
-    goToSlide(slideIndex);
-  }, 4000);
+let autoTimer = null;
+function startAuto(){
+  if(featured.length <= 1) return;
+  stopAuto();
+  autoTimer = setInterval(() => goToSlide(slideIndex + 1), 4000);
 }
+function stopAuto(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+}
+startAuto();
+
+const carouselEl = document.getElementById('carousel');
+// وقف الحركة التلقائية طول ما الماوس فوق الكاروسيل
+carouselEl.addEventListener('mouseenter', stopAuto);
+carouselEl.addEventListener('mouseleave', startAuto);
+
+// لما تدوس على نقطة، وقف الموقّت واستأنفه من جديد عشان مايقفزش فورًا
+document.querySelectorAll('.dot').forEach((dot, i) => {
+  dot.addEventListener('click', () => { goToSlide(i); startAuto(); });
+});
+
+/* ---- سحب بالماوس/باللمس عشان ترجع أو تقدّم يدويًا ---- */
+let isDragging = false;
+let dragStartX = 0;
+let dragDeltaX = 0;
+
+function dragStart(clientX){
+  isDragging = true;
+  dragStartX = clientX;
+  dragDeltaX = 0;
+  stopAuto();
+  track.style.transition = 'none';
+}
+function dragMove(clientX){
+  if(!isDragging) return;
+  dragDeltaX = clientX - dragStartX;
+  const percent = (dragDeltaX / carouselEl.offsetWidth) * 100;
+  track.style.transform = `translateX(calc(-${slideIndex * 100}% + ${percent}%))`;
+}
+function dragEnd(){
+  if(!isDragging) return;
+  isDragging = false;
+  track.style.transition = '';
+  const threshold = carouselEl.offsetWidth * 0.15;
+  if(dragDeltaX > threshold){
+    goToSlide(slideIndex - 1);
+  } else if(dragDeltaX < -threshold){
+    goToSlide(slideIndex + 1);
+  } else {
+    goToSlide(slideIndex);
+  }
+  startAuto();
+}
+
+track.addEventListener('mousedown', e => { dragStart(e.clientX); e.preventDefault(); });
+window.addEventListener('mousemove', e => dragMove(e.clientX));
+window.addEventListener('mouseup', dragEnd);
+
+track.addEventListener('touchstart', e => dragStart(e.touches[0].clientX), {passive:true});
+track.addEventListener('touchmove', e => dragMove(e.touches[0].clientX), {passive:true});
+track.addEventListener('touchend', dragEnd);
 
 track.addEventListener('click', e => {
   const btn = e.target.closest('.carousel-add');
@@ -133,10 +195,13 @@ function renderGrid(){
 function buildProductCard(p){
   const card = document.createElement('div');
   card.className = 'prod-card';
+  const media = p.image
+    ? `<img src="${p.image}" alt="${p.name}">`
+    : p.icon;
   card.innerHTML = `
     <div class="prod-img">
       ${p.badge ? `<span class="mini-badge ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Top'}</span>` : ''}
-      ${p.icon}
+      ${media}
     </div>
     <div class="prod-body">
       <h3>${p.name}</h3>
