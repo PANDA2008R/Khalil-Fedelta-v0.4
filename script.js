@@ -17,25 +17,13 @@ const STORE_NAME = "Khalil Fedeltà";
    ============================================ */
 const products = [
   // --- Macchine di Pulizia ---
-  {id:1, name:"Lavapavimenti Professionale", cat:"macchine", price:320, oldPrice:null, desc:"Lava e asciuga pavimenti in un solo passaggio, uso professionale.", icon:"🧽", image:null, badge:"bestseller"},
-  {id:2, name:"Aspirapolvere Industriale", cat:"macchine", price:250, oldPrice:null, desc:"Potenza elevata per grandi ambienti e cantieri.", icon:"🔌", image:null, badge:null},
-  {id:3, name:"Lucidatrice Pavimenti", cat:"macchine", price:280, oldPrice:320, desc:"Risultato lucido professionale su marmo e gres.", icon:"✨", image:null, badge:"offerta"},
-  {id:4, name:"Idropulitrice Alta Pressione", cat:"macchine", price:190, oldPrice:null, desc:"Ideale per esterni, cortili e facciate.", icon:"💦", image:null, badge:null},
-  {id:5, name:"Monospazzola Professionale", cat:"macchine", price:410, oldPrice:null, desc:"Per la manutenzione di grandi superfici commerciali.", icon:"⚙️", image:null, badge:null},
+
 
   // --- Attrezzi di Pulizia ---
-  {id:6, name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", image:null, badge:null},
-  {id:7, name:"Mocio con Secchio e Strizzatore", cat:"attrezzi", price:28, oldPrice:null, desc:"Sistema completo con panno in microfibra lavabile.", icon:"🪣", image:null, badge:"bestseller"},
-  {id:8, name:"Paletta e Scopino", cat:"attrezzi", price:8, oldPrice:null, desc:"Set pratico per la pulizia quotidiana.", icon:"🧺", image:null, badge:null},
-  {id:9, name:"Spazzolone per Esterni", cat:"attrezzi", price:19, oldPrice:24, desc:"Manico lungo, ideale per cortili e garage.", icon:"🧽", image:null, badge:"offerta"},
-  {id:10, name:"Set Panni Microfibra (x10)", cat:"attrezzi", price:12, oldPrice:null, desc:"Panni professionali per vetri e superfici delicate.", icon:"🧻", image:null, badge:null},
+ 
 
   // --- Prodotti Liquidi ---
-  {id:11, name:"Detersivo Multiuso", cat:"liquidi", price:6, oldPrice:null, desc:"Sgrassatore professionale per ogni superficie.", icon:"🧴", image:null, badge:null},
-  {id:12, name:"Ammoniaca Concentrata", cat:"liquidi", price:5, oldPrice:null, desc:"Azione sgrassante rapida ed efficace.", icon:"🧪", image:null, badge:null},
-  {id:13, name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", image:null, badge:"bestseller"},
-  {id:14, name:"Sgrassatore Professionale", cat:"liquidi", price:9, oldPrice:12, desc:"Formula concentrata per cucine e officine.", icon:"🧴", image:null, badge:"offerta"},
-  {id:15, name:"Detergente Pavimenti", cat:"liquidi", price:8, oldPrice:null, desc:"Profumazione lunga durata, azione antibatterica.", icon:"🧴", image:null, badge:null},
+ 
 ];
 
 /* الخدمات المنزلية */
