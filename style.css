@@ -31,14 +31,12 @@ header{
 }
 .logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.4rem;line-height:1.1;}
 .logo-badge{
-  width:44px;height:44px;border-radius:12px;
-  background:linear-gradient(135deg, var(--green) 0%, #0d6b34 100%);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.3rem;color:#04140a;
-  box-shadow:0 6px 18px -6px rgba(34,197,94,.6), inset 0 1px 0 rgba(255,255,255,.25);
-  letter-spacing:0;flex-shrink:0;
-  transform:rotate(-6deg);
+  width:46px;height:46px;flex-shrink:0;
+  display:block;object-fit:contain;
+  filter:drop-shadow(0 6px 14px rgba(34,197,94,.35));
+  transition:.25s;
 }
+.logo:hover .logo-badge{transform:scale(1.06) rotate(-2deg);}
 .logo .fedelta{color:var(--green);display:block;font-size:1.4rem;}
 
 nav ul{display:flex;gap:26px;font-weight:500;font-size:.95rem;}
@@ -445,7 +443,7 @@ button:focus-visible, a:focus-visible, input:focus-visible{
 @media(max-width:480px){
   header{padding:14px 4%;}
   .logo{font-size:1.15rem;gap:8px;}
-  .logo-badge{width:36px;height:36px;font-size:1.05rem;border-radius:9px;}
+  .logo-badge{width:36px;height:36px;}
   .hero{padding:36px 4% 16px;}
   .hero h1{font-size:1.6rem;}
   .hero p.sub{font-size:.9rem;}
