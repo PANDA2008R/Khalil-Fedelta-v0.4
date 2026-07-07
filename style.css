@@ -466,3 +466,39 @@ button:focus-visible, a:focus-visible, input:focus-visible{
   .slide h3{font-size:1.2rem;}
   .icon-big{font-size:3.2rem;}
 }
+
+/* ============================================
+   شاشة الترحيب (Splash Screen)
+   ============================================ */
+#splashScreen{
+  position:fixed;inset:0;z-index:500;
+  background:radial-gradient(circle at 50% 40%, #101a12 0%, #0a0e17 65%);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .6s ease, visibility .6s ease;
+}
+#splashScreen.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-inner{text-align:center;animation:splashPop .8s ease both;}
+.splash-name{
+  font-family:'Poppins',sans-serif;font-weight:800;
+  font-size:clamp(2.2rem,7vw,3.4rem);color:#f2f4f8;letter-spacing:.01em;
+}
+.splash-name .fedelta{
+  color:var(--green);display:block;
+  background:linear-gradient(90deg,#4ade80,#16a34a);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.splash-line{
+  width:70px;height:3px;margin:18px auto;border-radius:3px;
+  background:linear-gradient(90deg,#4ade80,#16a34a);
+  animation:splashLine 1.4s ease-in-out infinite;
+}
+.splash-tagline{color:var(--muted);font-size:.95rem;letter-spacing:.03em;}
+
+@keyframes splashPop{
+  0%{opacity:0;transform:scale(.92) translateY(10px);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+@keyframes splashLine{
+  0%,100%{width:70px;opacity:.7;}
+  50%{width:110px;opacity:1;}
+}
