@@ -262,7 +262,7 @@ nav a:hover::after{width:100%;}
   display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
   gap:24px;max-width:1200px;margin:0 auto;
 }
-.prod-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.3s;position:relative;}
+.prod-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.3s;position:relative;cursor:pointer;}
 .prod-card:hover{transform:translateY(-6px);border-color:var(--green);}
 .prod-img{
   height:150px;background:linear-gradient(135deg,var(--surface2),var(--bg));
@@ -276,6 +276,23 @@ nav a:hover::after{width:100%;}
 }
 .mini-badge.offerta{background:var(--gold);color:#1a1400;}
 .mini-badge.bestseller{background:var(--green);color:var(--bg);}
+
+/* تأثير بريق على شارة العرض */
+.mini-badge.offerta, .badge-tag.offerta{
+  position:relative;overflow:hidden;
+}
+.mini-badge.offerta::after, .badge-tag.offerta::after{
+  content:'';
+  position:absolute;top:0;left:-150%;
+  width:60%;height:100%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.75), transparent);
+  animation:sparkleShine 2.6s ease-in-out infinite;
+}
+@keyframes sparkleShine{
+  0%{left:-150%;}
+  50%{left:150%;}
+  100%{left:150%;}
+}
 .prod-body{padding:18px;}
 .prod-body h3{font-size:1.05rem;margin-bottom:6px;}
 .prod-body .desc{color:var(--muted);font-size:.8rem;margin-bottom:14px;line-height:1.5;}
