@@ -224,11 +224,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 grid.addEventListener('click', e => {
-  const imgEl = e.target.closest('.prod-img');
-  if(imgEl){ openDetailModal(imgEl.dataset.id); return; }
   const btn = e.target.closest('.add-btn');
-  if(!btn || btn.disabled) return;
-  addToCart(btn.dataset.id);
+  if(btn){ if(!btn.disabled) addToCart(btn.dataset.id); return; }
+  const card = e.target.closest('.prod-card');
+  if(card){
+    const id = card.querySelector('.prod-img').dataset.id;
+    openDetailModal(id);
+  }
 });
 
 /* ============================================
@@ -318,11 +320,13 @@ searchInput.addEventListener('input', () => {
 });
 
 searchResults.addEventListener('click', e => {
-  const imgEl = e.target.closest('.prod-img');
-  if(imgEl){ openDetailModal(imgEl.dataset.id); return; }
   const btn = e.target.closest('.add-btn');
-  if(!btn || btn.disabled) return;
-  addToCart(btn.dataset.id);
+  if(btn){ if(!btn.disabled) addToCart(btn.dataset.id); return; }
+  const card = e.target.closest('.prod-card');
+  if(card){
+    const id = card.querySelector('.prod-img').dataset.id;
+    openDetailModal(id);
+  }
 });
 
 /* ============================================
