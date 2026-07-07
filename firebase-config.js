@@ -3,12 +3,12 @@
    إزاي تجيبها: هوريك خطوة خطوة في الشات
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyBH-BKsW6TFxEsh8GRv1HMm3pBB0hz4Feg",
-  authDomain: "khalil-fedelta.firebaseapp.com",
-  projectId: "khalil-fedelta",
-  storageBucket: "khalil-fedelta.firebasestorage.app",
-  messagingSenderId: "1047601203577",
-  appId: "1:1047601203577:web:668e6bee4cd5b3914987a8"
+  apiKey: "AIzaSyDr8usXh2cOOnmj8KxIk0UegeC_gLSTGPc",
+  authDomain: "khalil-fedelta-c80a5.firebaseapp.com",
+  projectId: "khalil-fedelta-c80a5",
+  storageBucket: "khalil-fedelta-c80a5.firebasestorage.app",
+  messagingSenderId: "844428068167",
+  appId: "1:844428068167:web:d05822dacf04fd67e47862"
 };
 
 let db, auth;
