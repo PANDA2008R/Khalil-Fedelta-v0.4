@@ -1,32 +1,19 @@
 /* ============================================
    إعدادات عامة — WhatsApp والشركة
    ============================================ */
-const WHATSAPP_NUMBER = "393934020090"; // بدون + وبدون مسافات
+const WHATSAPP_NUMBER = "393934020090";
 const STORE_NAME = "Khalil Fedeltà";
 
-/* ============================================
-   بيانات المنتجات
-   عايز تضيف منتج جديد؟ انسخ سطر وغيّر البيانات:
-   {id: رقم_فريد, name:"الاسم", cat:"macchine|attrezzi|liquidi",
-    price: السعر, oldPrice: السعر_قبل_العرض_أو_null,
-    desc:"الوصف", icon:"🛠️", image:"رابط الصورة أو null",
-    badge:"offerta"|"bestseller"|null}
-
-   لو عندك صورة حقيقية: حط رابطها في image، وهي هتظهر بدل الإيموجي تلقائي.
-   لو مفيش صورة: سيب image: null وهيستخدم الإيموجي اللي في icon.
-   ============================================ */
-const products = [
-  // --- Macchine di Pulizia ---
-
-
-  // --- Attrezzi di Pulizia ---
- 
-
-  // --- Prodotti Liquidi ---
- 
+/* منتجات احتياطية تظهر فقط لو مفيش اتصال بـ Firebase أو القاعدة فاضية */
+const defaultProducts = [
+  {id:"d1", name:"Lavapavimenti Professionale", cat:"macchine", price:320, oldPrice:null, desc:"Lava e asciuga pavimenti in un solo passaggio, uso professionale.", icon:"🧽", image:null, badge:"bestseller"},
+  {id:"d2", name:"Aspirapolvere Industriale", cat:"macchine", price:250, oldPrice:null, desc:"Potenza elevata per grandi ambienti e cantieri.", icon:"🔌", image:null, badge:null},
+  {id:"d3", name:"Scopa Professionale", cat:"attrezzi", price:15, oldPrice:null, desc:"Setole resistenti per interni ed esterni.", icon:"🧹", image:null, badge:null},
+  {id:"d4", name:"Mocio con Secchio e Strizzatore", cat:"attrezzi", price:28, oldPrice:null, desc:"Sistema completo con panno in microfibra lavabile.", icon:"🪣", image:null, badge:"bestseller"},
+  {id:"d5", name:"Detersivo Multiuso", cat:"liquidi", price:6, oldPrice:null, desc:"Sgrassatore professionale per ogni superficie.", icon:"🧴", image:null, badge:null},
+  {id:"d6", name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", image:null, badge:"bestseller"},
 ];
 
-/* الخدمات المنزلية */
 const services = [
   {name:"Pulizia Casa", icon:"🏠", desc:"Pulizia completa per appartamenti e ville.", priceLabel:"A partire da €40"},
   {name:"Pulizia Uffici", icon:"🏢", desc:"Servizi professionali per uffici e negozi.", priceLabel:"A partire da €60"},
@@ -34,53 +21,84 @@ const services = [
   {name:"Consegna a Domicilio", icon:"🚚", desc:"Consegna rapida in tutta la zona di Milano.", priceLabel:"Gratuita sopra €50"},
 ];
 
-/* Prodotti in evidenza per il carosello (offerte / più venduti) */
-const featured = products.filter(p => p.badge).slice(0, 4);
-
+let products = [];
+let featured = [];
 let cart = [];
 let currentCat = "macchine";
 let currentPage = 1;
 const PAGE_SIZE = 6;
 
+function sameId(a, b){ return String(a) === String(b); }
+
 /* ============================================
-   CAROSELLO — cambia ogni 2 secondi
+   Toast (رسالة تأكيد صغيرة تحت)
+   ============================================ */
+function showToast(msg){
+  let toast = document.getElementById('toastMsg');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'toastMsg';
+    toast.className = 'toast-msg';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ============================================
+   CAROSELLO
    ============================================ */
 const track = document.getElementById('carouselTrack');
 const dotsWrap = document.getElementById('carouselDots');
+const carouselEl = document.getElementById('carousel');
 let slideIndex = 0;
+let autoTimer = null;
 
-featured.forEach((p, i) => {
-  const slide = document.createElement('div');
-  slide.className = 'slide';
-  const media = p.image
-    ? `<img src="${p.image}" alt="${p.name}">`
-    : p.icon;
-  slide.innerHTML = `
-    <div class="info">
-      <span class="badge-tag ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Più Venduto'}</span>
-      <h3>${p.name}</h3>
-      <div class="price-row">
-        <span class="price">€${p.price}</span>
-        ${p.oldPrice ? `<span class="old-price">€${p.oldPrice}</span>` : ''}
+function buildCarousel(){
+  featured = products.filter(p => p.badge && !p.outOfStock).slice(0, 4);
+  track.innerHTML = '';
+  dotsWrap.innerHTML = '';
+  slideIndex = 0;
+
+  featured.forEach((p) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+    const media = p.image ? `<img src="${p.image}" alt="${p.name}">` : p.icon;
+    slide.innerHTML = `
+      <div class="info">
+        <span class="badge-tag ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Più Venduto'}</span>
+        <h3>${p.name}</h3>
+        <div class="price-row">
+          <span class="price">€${p.price}</span>
+          ${p.oldPrice ? `<span class="old-price">€${p.oldPrice}</span>` : ''}
+        </div>
+        <button data-id="${p.id}" class="carousel-add ripple-btn">Aggiungi al Carrello</button>
       </div>
-      <button data-id="${p.id}" class="carousel-add ripple-btn">Aggiungi al Carrello</button>
-    </div>
-    <div class="icon-big">${media}</div>
-  `;
-  track.appendChild(slide);
+      <div class="icon-big">${media}</div>
+    `;
+    track.appendChild(slide);
+  });
 
-  const dot = document.createElement('div');
-  dot.className = 'dot' + (i === 0 ? ' active' : '');
-  dotsWrap.appendChild(dot);
-});
+  featured.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => { goToSlide(i); startAuto(); });
+    dotsWrap.appendChild(dot);
+  });
+
+  track.style.transform = 'translateX(0)';
+  startAuto();
+}
 
 function goToSlide(i){
+  if(featured.length === 0) return;
   slideIndex = (i + featured.length) % featured.length;
   track.style.transform = `translateX(-${slideIndex * 100}%)`;
   document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('active', idx === slideIndex));
 }
 
-let autoTimer = null;
 function startAuto(){
   if(featured.length <= 1) return;
   stopAuto();
@@ -89,24 +107,16 @@ function startAuto(){
 function stopAuto(){
   if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
 }
-startAuto();
 
-const carouselEl = document.getElementById('carousel');
-// وقف الحركة التلقائية طول ما الماوس فوق الكاروسيل
 carouselEl.addEventListener('mouseenter', stopAuto);
 carouselEl.addEventListener('mouseleave', startAuto);
 
-// لما تدوس على نقطة، وقف الموقّت واستأنفه من جديد عشان مايقفزش فورًا
-document.querySelectorAll('.dot').forEach((dot, i) => {
-  dot.addEventListener('click', () => { goToSlide(i); startAuto(); });
-});
-
-/* ---- سحب بالماوس/باللمس عشان ترجع أو تقدّم يدويًا ---- */
 let isDragging = false;
 let dragStartX = 0;
 let dragDeltaX = 0;
 
 function dragStart(clientX){
+  if(featured.length === 0) return;
   isDragging = true;
   dragStartX = clientX;
   dragDeltaX = 0;
@@ -124,28 +134,28 @@ function dragEnd(){
   isDragging = false;
   track.style.transition = '';
   const threshold = carouselEl.offsetWidth * 0.15;
-  if(dragDeltaX > threshold){
-    goToSlide(slideIndex - 1);
-  } else if(dragDeltaX < -threshold){
-    goToSlide(slideIndex + 1);
-  } else {
-    goToSlide(slideIndex);
-  }
+  if(dragDeltaX > threshold) goToSlide(slideIndex - 1);
+  else if(dragDeltaX < -threshold) goToSlide(slideIndex + 1);
+  else goToSlide(slideIndex);
   startAuto();
 }
 
 track.addEventListener('mousedown', e => { dragStart(e.clientX); e.preventDefault(); });
 window.addEventListener('mousemove', e => dragMove(e.clientX));
 window.addEventListener('mouseup', dragEnd);
-
 track.addEventListener('touchstart', e => dragStart(e.touches[0].clientX), {passive:true});
 track.addEventListener('touchmove', e => dragMove(e.touches[0].clientX), {passive:true});
 track.addEventListener('touchend', dragEnd);
 
 track.addEventListener('click', e => {
   const btn = e.target.closest('.carousel-add');
-  if(!btn) return;
-  addToCart(parseInt(btn.dataset.id));
+  if(btn){ addToCart(btn.dataset.id); return; }
+  const iconBig = e.target.closest('.icon-big');
+  if(iconBig){
+    const slide = iconBig.closest('.slide');
+    const addBtn = slide && slide.querySelector('.carousel-add');
+    if(addBtn) openDetailModal(addBtn.dataset.id);
+  }
 });
 
 /* ============================================
@@ -183,20 +193,20 @@ function renderGrid(){
 function buildProductCard(p){
   const card = document.createElement('div');
   card.className = 'prod-card';
-  const media = p.image
-    ? `<img src="${p.image}" alt="${p.name}">`
-    : p.icon;
+  const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+  const media = imgs.length ? `<img src="${imgs[0]}" alt="${p.name}">` : (p.icon || '🧴');
+  const outClass = p.outOfStock ? ' out-of-stock' : '';
   card.innerHTML = `
-    <div class="prod-img">
-      ${p.badge ? `<span class="mini-badge ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Top'}</span>` : ''}
+    <div class="prod-img${outClass}" data-id="${p.id}">
+      ${p.badge && !p.outOfStock ? `<span class="mini-badge ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Top'}</span>` : ''}
       ${media}
     </div>
     <div class="prod-body">
       <h3>${p.name}</h3>
-      <p class="desc">${p.desc}</p>
+      <p class="desc">${p.desc || ''}</p>
       <div class="prod-row">
         <span class="prod-price">€${p.price}${p.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:.8rem;">€${p.oldPrice}</span>` : ''}</span>
-        <button class="add-btn ripple-btn" data-id="${p.id}">Aggiungi</button>
+        <button class="add-btn ripple-btn${p.outOfStock ? ' disabled' : ''}" data-id="${p.id}" ${p.outOfStock ? 'disabled' : ''}>${p.outOfStock ? 'Esaurito' : 'Aggiungi'}</button>
       </div>
     </div>
   `;
@@ -214,15 +224,44 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 grid.addEventListener('click', e => {
+  const imgEl = e.target.closest('.prod-img');
+  if(imgEl){ openDetailModal(imgEl.dataset.id); return; }
   const btn = e.target.closest('.add-btn');
-  if(!btn) return;
-  addToCart(parseInt(btn.dataset.id));
-  btn.classList.add('added');
-  btn.textContent = 'Aggiunto ✓';
-  setTimeout(() => { btn.classList.remove('added'); btn.textContent = 'Aggiungi'; }, 1200);
+  if(!btn || btn.disabled) return;
+  addToCart(btn.dataset.id);
 });
 
-renderGrid();
+/* ============================================
+   تحميل المنتجات من Firebase
+   ============================================ */
+function applyProducts(list){
+  products = list;
+  buildCarousel();
+  renderGrid();
+}
+
+function loadProducts(){
+  if(typeof db === 'undefined' || !db){
+    console.warn('Firebase مش شغال — بيتعرض منتجات تجريبية بس.');
+    applyProducts(defaultProducts);
+    return;
+  }
+  db.collection('products').onSnapshot(
+    snapshot => {
+      if(snapshot.empty){
+        applyProducts(defaultProducts);
+      } else {
+        const list = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        applyProducts(list);
+      }
+    },
+    err => {
+      console.error('خطأ في تحميل المنتجات من Firebase:', err);
+      applyProducts(defaultProducts);
+    }
+  );
+}
+loadProducts();
 
 /* ============================================
    SERVIZI
@@ -268,7 +307,7 @@ searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
   if(!q){ searchResults.innerHTML = ''; return; }
   const matches = products.filter(p =>
-    p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)
+    p.name.toLowerCase().includes(q) || (p.desc || '').toLowerCase().includes(q)
   );
   searchResults.innerHTML = '';
   if(matches.length === 0){
@@ -279,16 +318,15 @@ searchInput.addEventListener('input', () => {
 });
 
 searchResults.addEventListener('click', e => {
+  const imgEl = e.target.closest('.prod-img');
+  if(imgEl){ openDetailModal(imgEl.dataset.id); return; }
   const btn = e.target.closest('.add-btn');
-  if(!btn) return;
-  addToCart(parseInt(btn.dataset.id));
-  btn.classList.add('added');
-  btn.textContent = 'Aggiunto ✓';
-  setTimeout(() => { btn.classList.remove('added'); btn.textContent = 'Aggiungi'; }, 1200);
+  if(!btn || btn.disabled) return;
+  addToCart(btn.dataset.id);
 });
 
 /* ============================================
-   CARRELLO
+   CARRELLO — مبيفتحش لوحده، بس بيوري رسالة تأكيد
    ============================================ */
 const cartBtn = document.getElementById('cartBtn');
 const cartPanel = document.getElementById('cartPanel');
@@ -301,12 +339,12 @@ const cartCountEl = document.getElementById('cartCount');
 const checkoutBtn = document.getElementById('checkoutBtn');
 
 function addToCart(id){
-  const product = products.find(p => p.id === id);
-  if(!product) return;
-  const existing = cart.find(item => item.id === id);
+  const product = products.find(p => sameId(p.id, id));
+  if(!product || product.outOfStock) return;
+  const existing = cart.find(item => sameId(item.id, id));
   if(existing){ existing.qty += 1; } else { cart.push({...product, qty:1}); }
   updateCartUI();
-  openCart();
+  showToast(`${product.name} — Aggiunto al carrello ✓`);
 }
 
 function openCart(){ cartPanel.classList.add('open'); overlay.classList.add('open'); }
@@ -325,7 +363,7 @@ function updateCartUI(){
     cartItemsEl.innerHTML = cart.map(item => `
       <div class="cart-item">
         <div>
-          <div class="name">${item.icon} ${item.name}</div>
+          <div class="name">${item.icon || '🧴'} ${item.name}</div>
           <div class="sub">€${item.price} x ${item.qty} = €${item.price * item.qty}</div>
           <div class="qty-ctrl">
             <button class="qty-minus" data-id="${item.id}">−</button>
@@ -344,26 +382,23 @@ function updateCartUI(){
 }
 
 cartItemsEl.addEventListener('click', e => {
-  const id = parseInt(e.target.dataset.id);
+  const id = e.target.dataset.id;
   if(!id) return;
   if(e.target.classList.contains('remove-btn')){
-    cart = cart.filter(item => item.id !== id);
+    cart = cart.filter(item => !sameId(item.id, id));
   } else if(e.target.classList.contains('qty-plus')){
-    const item = cart.find(i => i.id === id);
+    const item = cart.find(i => sameId(i.id, id));
     if(item) item.qty += 1;
   } else if(e.target.classList.contains('qty-minus')){
-    const item = cart.find(i => i.id === id);
+    const item = cart.find(i => sameId(i.id, id));
     if(item){
       item.qty -= 1;
-      if(item.qty <= 0) cart = cart.filter(i => i.id !== id);
+      if(item.qty <= 0) cart = cart.filter(i => !sameId(i.id, id));
     }
   }
   updateCartUI();
 });
 
-/* ============================================
-   CONFERMA ORDINE → WHATSAPP (come una ricevuta)
-   ============================================ */
 checkoutBtn.addEventListener('click', () => {
   if(cart.length === 0){
     alert('Il carrello è vuoto. Aggiungi almeno un prodotto prima di confermare.');
@@ -375,21 +410,27 @@ checkoutBtn.addEventListener('click', () => {
   });
   const total = cart.reduce((s,i) => s + i.qty * i.price, 0);
   message += `\n*Totale: €${total}*\n\nAttendo conferma disponibilità. Grazie!`;
-
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 });
 
-/* Link generico del pulsante WhatsApp flottante */
 document.getElementById('whatsappFab').href =
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Ciao ' + STORE_NAME + '! Vorrei maggiori informazioni.')}`;
 
 /* ============================================
-   قائمة الموبايل (الهامبرغر ☰)
+   قائمة الموبايل (الهامبرغر ☰) — بتتحط تحت الهيدر أيًا كان مكانك
    ============================================ */
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const mobileNav = document.getElementById('mobileNav');
+const headerEl = document.querySelector('header');
+
+function positionMobileNav(){
+  mobileNav.style.top = headerEl.offsetHeight + 'px';
+}
+positionMobileNav();
+window.addEventListener('resize', positionMobileNav);
 
 hamburgerBtn.addEventListener('click', () => {
+  positionMobileNav();
   hamburgerBtn.classList.toggle('open');
   mobileNav.classList.toggle('open');
 });
@@ -400,6 +441,103 @@ mobileNav.querySelectorAll('a').forEach(link => {
     mobileNav.classList.remove('open');
   });
 });
+
+/* ============================================
+   نافذة تفاصيل المنتج
+   ============================================ */
+const detailOverlay = document.getElementById('detailOverlay');
+const detailModal = document.getElementById('detailModal');
+const detailClose = document.getElementById('detailClose');
+const detailImg = document.getElementById('detailImg');
+const detailPrev = document.getElementById('detailPrev');
+const detailNext = document.getElementById('detailNext');
+const detailDots = document.getElementById('detailDots');
+const detailBadge = document.getElementById('detailBadge');
+const detailName = document.getElementById('detailName');
+const detailDesc = document.getElementById('detailDesc');
+const detailPrice = document.getElementById('detailPrice');
+const detailAddBtn = document.getElementById('detailAddBtn');
+
+let detailProduct = null;
+let detailImgIndex = 0;
+
+function openDetailModal(id){
+  const product = products.find(p => sameId(p.id, id));
+  if(!product) return;
+  detailProduct = product;
+  detailImgIndex = 0;
+  renderDetailImage();
+
+  detailName.textContent = product.name;
+  detailDesc.textContent = product.desc || '';
+  detailPrice.innerHTML = `€${product.price}` + (product.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:1rem;">€${product.oldPrice}</span>` : '');
+
+  if(product.badge && !product.outOfStock){
+    detailBadge.style.display = 'inline-block';
+    detailBadge.className = 'mini-badge ' + product.badge;
+    detailBadge.textContent = product.badge === 'offerta' ? 'Offerta' : 'Più Venduto';
+  } else {
+    detailBadge.style.display = 'none';
+  }
+
+  if(product.outOfStock){
+    detailAddBtn.textContent = 'Esaurito';
+    detailAddBtn.disabled = true;
+    detailAddBtn.classList.add('disabled');
+  } else {
+    detailAddBtn.textContent = 'Aggiungi al Carrello';
+    detailAddBtn.disabled = false;
+    detailAddBtn.classList.remove('disabled');
+  }
+
+  detailOverlay.classList.add('open');
+  detailModal.classList.add('open');
+}
+
+function renderDetailImage(){
+  const imgs = (detailProduct.images && detailProduct.images.length) ? detailProduct.images : (detailProduct.image ? [detailProduct.image] : []);
+  detailImg.innerHTML = imgs.length ? `<img src="${imgs[detailImgIndex]}" alt="${detailProduct.name}">` : (detailProduct.icon || '🧴');
+
+  detailDots.innerHTML = '';
+  detailPrev.style.display = imgs.length > 1 ? 'flex' : 'none';
+  detailNext.style.display = imgs.length > 1 ? 'flex' : 'none';
+  if(imgs.length > 1){
+    imgs.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === detailImgIndex ? ' active' : '');
+      dot.addEventListener('click', () => { detailImgIndex = i; renderDetailImage(); });
+      detailDots.appendChild(dot);
+    });
+  }
+}
+
+function closeDetailModal(){
+  detailOverlay.classList.remove('open');
+  detailModal.classList.remove('open');
+}
+
+detailClose.addEventListener('click', closeDetailModal);
+detailOverlay.addEventListener('click', closeDetailModal);
+
+detailPrev.addEventListener('click', () => {
+  const imgs = (detailProduct.images && detailProduct.images.length) ? detailProduct.images : [detailProduct.image];
+  detailImgIndex = (detailImgIndex - 1 + imgs.length) % imgs.length;
+  renderDetailImage();
+});
+detailNext.addEventListener('click', () => {
+  const imgs = (detailProduct.images && detailProduct.images.length) ? detailProduct.images : [detailProduct.image];
+  detailImgIndex = (detailImgIndex + 1) % imgs.length;
+  renderDetailImage();
+});
+
+detailAddBtn.addEventListener('click', () => {
+  if(!detailProduct || detailProduct.outOfStock) return;
+  addToCart(detailProduct.id);
+});
+
+/* ============================================
+   تأثير Ripple عام
+   ============================================ */
 document.addEventListener('click', e => {
   const btn = e.target.closest('.ripple-btn');
   if(!btn) return;
