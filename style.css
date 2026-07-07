@@ -48,9 +48,11 @@ nav a::after{content:'';position:absolute;left:0;bottom:-2px;width:0;height:2px;
 nav a:hover::after{width:100%;}
 
 .mobile-nav{
+  position:fixed;left:0;right:0;z-index:59;
   display:flex;flex-direction:column;
   max-height:0;overflow:hidden;
   background:var(--surface);border-bottom:1px solid var(--line);
+  box-shadow:0 12px 24px -8px rgba(0,0,0,.4);
   transition:max-height .3s ease;
 }
 .mobile-nav.open{max-height:300px;}
@@ -59,6 +61,76 @@ nav a:hover::after{width:100%;}
   font-weight:500;color:var(--text);
 }
 .mobile-nav a:hover{color:var(--green);background:var(--surface2);}
+
+/* رسالة تأكيد "تمت الإضافة" تحت الشاشة */
+.toast-msg{
+  position:fixed;bottom:26px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--surface2);color:var(--text);
+  border:1px solid var(--green);
+  padding:13px 22px;border-radius:10px;
+  font-size:.9rem;font-weight:500;
+  box-shadow:0 10px 25px -8px rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;
+  transition:.3s;
+  z-index:200;
+  max-width:88vw;text-align:center;
+}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* منتج نفذ من المخزون */
+.mini-badge.esaurito{background:#6b7280;color:#fff;}
+.prod-img.out-of-stock::after{
+  content:'Esaurito';
+  position:absolute;inset:0;
+  background:rgba(10,14,23,.72);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:.85rem;
+}
+.add-btn.disabled, .add-btn:disabled{
+  opacity:.5;cursor:not-allowed;
+}
+.add-btn.disabled:hover, .add-btn:disabled:hover{background:var(--surface2);color:var(--text);}
+.prod-img{cursor:pointer;}
+
+/* ---------- نافذة تفاصيل المنتج ---------- */
+.detail-modal{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);
+  width:640px;max-width:92vw;max-height:88vh;overflow-y:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  z-index:150;opacity:0;pointer-events:none;transition:.25s;
+  display:flex;flex-direction:column;
+}
+.detail-modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+#detailOverlay{z-index:149;}
+.detail-close{
+  position:absolute;top:14px;right:14px;z-index:5;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(10,14,23,.6);border:1px solid var(--line);color:#fff;
+  font-size:1.3rem;cursor:pointer;
+}
+.detail-img-wrap{
+  position:relative;height:280px;background:linear-gradient(135deg,var(--surface2),var(--bg));
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  border-radius:16px 16px 0 0;flex-shrink:0;
+}
+.detail-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;}
+.detail-img img{width:100%;height:100%;object-fit:cover;}
+.detail-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(10,14,23,.6);border:1px solid var(--line);color:#fff;
+  font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.detail-arrow.prev{left:14px;} .detail-arrow.next{right:14px;}
+.detail-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:6px;}
+.detail-dots .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4);}
+.detail-dots .dot.active{background:#fff;width:16px;border-radius:4px;}
+.detail-body{padding:26px;}
+.detail-body h3{font-size:1.4rem;margin:12px 0 10px;}
+.detail-desc{color:var(--muted);font-size:.95rem;line-height:1.7;margin-bottom:20px;}
+.detail-price-row{display:flex;align-items:center;justify-content:space-between;}
+.detail-price{color:var(--green);font-weight:800;font-size:1.5rem;}
 
 .header-icons{display:flex;align-items:center;gap:12px;}
 .hamburger{display:none;}
@@ -155,7 +227,7 @@ nav a:hover::after{width:100%;}
 .slide .price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;}
 .slide .price{font-size:1.7rem;font-weight:800;color:var(--green);}
 .slide .old-price{color:var(--muted);text-decoration:line-through;font-size:1rem;}
-.slide .icon-big{font-size:5rem;width:160px;height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.slide .icon-big{font-size:5rem;width:160px;height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
 .slide .icon-big img{width:100%;height:100%;object-fit:contain;border-radius:14px;}
 .slide button{
   background:var(--green);color:var(--bg);border:none;
