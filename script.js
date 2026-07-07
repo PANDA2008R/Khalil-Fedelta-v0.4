@@ -4,6 +4,14 @@
 const WHATSAPP_NUMBER = "393934020090";
 const STORE_NAME = "Khalil Fedeltà";
 
+/* ============================================
+   شاشة الترحيب — تختفي أوتوماتيك بعد ثانية ونص
+   ============================================ */
+setTimeout(() => {
+  const splash = document.getElementById('splashScreen');
+  if(splash) splash.classList.add('hide');
+}, 1600);
+
 /* منتجات احتياطية تظهر فقط لو مفيش اتصال بـ Firebase أو القاعدة فاضية */
 const defaultProducts = [
   {id:"d1", name:"Lavapavimenti Professionale", cat:"macchine", price:320, oldPrice:null, desc:"Lava e asciuga pavimenti in un solo passaggio, uso professionale.", icon:"🧽", image:null, badge:"bestseller"},
