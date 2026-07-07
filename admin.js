@@ -47,32 +47,69 @@ auth && auth.onAuthStateChanged(user => {
   }
 });
 
-/* ---------- ضغط الصورة وتحويلها base64 (بدون Firebase Storage) ---------- */
-const fImage = document.getElementById('fImage');
-const imagePreview = document.getElementById('imagePreview');
-let currentImageData = null; // base64 string أو null
+/* ---------- رفع وضغط أكتر من صورة (لحد 4) بدون Firebase Storage ---------- */
+const fImages = document.getElementById('fImages');
+const galleryPreview = document.getElementById('galleryPreview');
+let currentImages = []; // مصفوفة base64 (لحد 4 صور)
 
-fImage.addEventListener('change', () => {
-  const file = fImage.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const maxWidth = 700;
-      const scale = Math.min(1, maxWidth / img.width);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      currentImageData = canvas.toDataURL('image/jpeg', 0.75);
-      imagePreview.innerHTML = `<img src="${currentImageData}" alt="preview">`;
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+function renderGalleryPreview(){
+  galleryPreview.innerHTML = '';
+  if(currentImages.length === 0){
+    galleryPreview.innerHTML = '<div class="gallery-empty">Nessuna immagine selezionata</div>';
+    return;
+  }
+  currentImages.forEach((imgData, idx) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'gallery-thumb';
+    thumb.innerHTML = `<img src="${imgData}" alt="foto ${idx+1}"><button type="button" class="remove-thumb" data-idx="${idx}">&times;</button>`;
+    galleryPreview.appendChild(thumb);
+  });
+}
+
+galleryPreview.addEventListener('click', (e) => {
+  const btn = e.target.closest('.remove-thumb');
+  if(!btn) return;
+  const idx = parseInt(btn.dataset.idx);
+  currentImages.splice(idx, 1);
+  renderGalleryPreview();
 });
+
+function compressImage(file){
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxWidth = 700;
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+fImages.addEventListener('change', async () => {
+  const files = Array.from(fImages.files).slice(0, 4 - currentImages.length);
+  if(currentImages.length + files.length > 4){
+    showStatus('أقصى عدد صور مسموح 4 لكل منتج.', 'error');
+  }
+  for(const file of files){
+    const compressed = await compressImage(file);
+    currentImages.push(compressed);
+  }
+  renderGalleryPreview();
+  fImages.value = '';
+});
+
+renderGalleryPreview();
+
 
 /* ---------- فورم الإضافة/التعديل ---------- */
 const editId = document.getElementById('editId');
@@ -83,6 +120,7 @@ const fPrice = document.getElementById('fPrice');
 const fOldPrice = document.getElementById('fOldPrice');
 const fDesc = document.getElementById('fDesc');
 const fIcon = document.getElementById('fIcon');
+const fOutOfStock = document.getElementById('fOutOfStock');
 const saveBtn = document.getElementById('saveBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formTitle = document.getElementById('formTitle');
@@ -96,9 +134,10 @@ function resetForm(){
   fOldPrice.value = '';
   fDesc.value = '';
   fIcon.value = '';
-  currentImageData = null;
-  fImage.value = '';
-  imagePreview.innerHTML = 'Nessuna immagine selezionata';
+  fOutOfStock.checked = false;
+  currentImages = [];
+  fImages.value = '';
+  renderGalleryPreview();
   formTitle.textContent = 'Aggiungi Nuovo Prodotto';
   cancelEditBtn.style.display = 'none';
 }
@@ -122,12 +161,15 @@ saveBtn.addEventListener('click', async () => {
     oldPrice: fOldPrice.value ? parseFloat(fOldPrice.value) : null,
     desc: fDesc.value.trim(),
     icon: fIcon.value.trim() || '🧴',
+    outOfStock: fOutOfStock.checked,
   };
 
-  // لو المستخدم رفع صورة جديدة، حطها. لو بيعدل منتج ومحطش صورة جديدة، سيب القديمة زي ما هي
-  if(currentImageData){
-    data.image = currentImageData;
+  // لو المستخدم اختار صور جديدة، حطها. لو بيعدل منتج ومحطش صور جديدة، سيب القديمة زي ما هي
+  if(currentImages.length > 0){
+    data.images = currentImages;
+    data.image = currentImages[0]; // للتوافق مع الكود القديم
   } else if(!editId.value){
+    data.images = [];
     data.image = null;
   }
 
@@ -167,12 +209,14 @@ function listenToProducts(){
       const p = { id: doc.id, ...doc.data() };
       const row = document.createElement('div');
       row.className = 'admin-row';
-      const thumb = p.image ? `<img src="${p.image}" alt="${p.name}">` : (p.icon || '🧴');
+      const firstImg = (p.images && p.images[0]) || p.image;
+      const thumb = firstImg ? `<img src="${firstImg}" alt="${p.name}">` : (p.icon || '🧴');
+      const imgCount = p.images ? p.images.length : (p.image ? 1 : 0);
       row.innerHTML = `
         <div class="thumb">${thumb}</div>
         <div class="info">
-          <h4>${p.name}</h4>
-          <span>${catLabels[p.cat] || p.cat} · €${p.price}${p.oldPrice ? ` (كان €${p.oldPrice})` : ''}${p.badge ? ' · ' + (p.badge === 'offerta' ? 'عرض' : 'الأكثر مبيعًا') : ''}</span>
+          <h4>${p.name}${p.outOfStock ? ' <span style="color:#f87171;">(Esaurito)</span>' : ''}</h4>
+          <span>${catLabels[p.cat] || p.cat} · €${p.price}${p.oldPrice ? ` (كان €${p.oldPrice})` : ''}${p.badge ? ' · ' + (p.badge === 'offerta' ? 'عرض' : 'الأكثر مبيعًا') : ''}${imgCount > 1 ? ` · ${imgCount} صور` : ''}</span>
         </div>
         <div class="row-actions">
           <button class="edit-btn" data-id="${p.id}" title="تعديل">✎</button>
@@ -201,8 +245,9 @@ adminList.addEventListener('click', async (e) => {
     fOldPrice.value = p.oldPrice ?? '';
     fDesc.value = p.desc || '';
     fIcon.value = p.icon || '';
-    currentImageData = null;
-    imagePreview.innerHTML = p.image ? `<img src="${p.image}" alt="preview">` : 'Nessuna immagine selezionata';
+    fOutOfStock.checked = !!p.outOfStock;
+    currentImages = p.images ? [...p.images] : (p.image ? [p.image] : []);
+    renderGalleryPreview();
     formTitle.textContent = 'تعديل المنتج: ' + p.name;
     cancelEditBtn.style.display = 'inline-block';
     window.scrollTo({top:0, behavior:'smooth'});
