@@ -197,7 +197,21 @@ nav a:hover::after{width:100%;}
 .search-results{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
 
 /* ---------- Hero + Carousel ---------- */
-.hero{padding:60px 5% 20px;text-align:center;}
+.hero{padding:60px 5% 20px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{
+  content:'';
+  position:absolute;top:-30%;left:50%;
+  width:900px;height:900px;
+  transform:translateX(-50%);
+  background:radial-gradient(circle, rgba(34,197,94,.10) 0%, transparent 60%);
+  animation:heroGlow 10s ease-in-out infinite;
+  z-index:0;pointer-events:none;
+}
+@keyframes heroGlow{
+  0%,100%{opacity:.6;transform:translateX(-50%) scale(1);}
+  50%{opacity:1;transform:translateX(-50%) scale(1.08);}
+}
+.hero-inner, .hero .carousel{position:relative;z-index:1;}
 .hero-inner{max-width:720px;margin:0 auto 40px;}
 .hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;line-height:1.2;margin:14px 0;}
 .hero h1 .accent{color:var(--green);}
@@ -227,8 +241,10 @@ nav a:hover::after{width:100%;}
 .slide .price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:18px;}
 .slide .price{font-size:1.7rem;font-weight:800;color:var(--green);}
 .slide .old-price{color:var(--muted);text-decoration:line-through;font-size:1rem;}
-.slide .icon-big{font-size:5rem;width:160px;height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
-.slide .icon-big img{width:100%;height:100%;object-fit:contain;border-radius:14px;}
+.slide{position:relative;align-self:stretch;}
+.slide .icon-big{font-size:5rem;width:240px;align-self:stretch;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin:-40px -6% -40px 0;border-radius:0 18px 18px 0;overflow:hidden;}
+.slide .icon-big img{width:100%;height:100%;object-fit:cover;}
+.slide .info{position:relative;z-index:2;}
 .slide button{
   background:var(--green);color:var(--bg);border:none;
   padding:11px 24px;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;
@@ -422,6 +438,7 @@ button:focus-visible, a:focus-visible, input:focus-visible{
   .slide{flex-direction:column;text-align:center;padding:20px;justify-content:center;gap:10px;}
   .slide .info{text-align:center;}
   .slide .price-row{justify-content:center;}
+  .slide .icon-big{width:100%;height:120px;margin:0;border-radius:12px;}
   .carousel{height:340px;}
 }
 
