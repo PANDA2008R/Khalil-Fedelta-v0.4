@@ -111,13 +111,96 @@ fImages.addEventListener('change', async () => {
 renderGalleryPreview();
 
 
+/* ---------- إدارة الأقسام (الكاتيجوريز) ---------- */
+const defaultCategories = [
+  {key:'macchine', label:'Macchine di Pulizia', icon:'🛠️', isDefault:true},
+  {key:'attrezzi', label:'Attrezzi di Pulizia', icon:'🧹', isDefault:true},
+  {key:'liquidi', label:'Prodotti Liquidi', icon:'🧴', isDefault:true},
+];
+let allCategories = [...defaultCategories];
+
+const fCat = document.getElementById('fCat');
+const catName = document.getElementById('catName');
+const catIcon = document.getElementById('catIcon');
+const addCatBtn = document.getElementById('addCatBtn');
+const catList = document.getElementById('catList');
+
+function slugify(text){
+  return text.trim().toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06FF\s]/g, '')
+    .replace(/\s+/g, '-');
+}
+
+function renderCategorySelect(){
+  const prevValue = fCat.value;
+  fCat.innerHTML = allCategories.map(c => `<option value="${c.key}">${c.icon} ${c.label}</option>`).join('');
+  fCat.value = prevValue || allCategories[0].key;
+}
+
+function renderCatList(){
+  catList.innerHTML = allCategories.map(c => `
+    <div class="cat-chip">
+      <span>${c.icon} ${c.label}</span>
+      ${c.isDefault ? '<span class="default-tag">(أساسي)</span>' : `<button class="delete-cat" data-key="${c.key}" title="حذف القسم">✕</button>`}
+    </div>
+  `).join('');
+}
+
+function loadCategories(){
+  db.collection('categories').onSnapshot(snapshot => {
+    const extra = snapshot.docs.map(doc => ({ id: doc.id, isDefault:false, ...doc.data() }));
+    allCategories = [...defaultCategories, ...extra];
+    renderCategorySelect();
+    renderCatList();
+  });
+}
+
+addCatBtn.addEventListener('click', async () => {
+  const label = catName.value.trim();
+  const icon = catIcon.value.trim() || '📦';
+  if(!label){
+    showStatus('اكتب اسم القسم الأول.', 'error');
+    return;
+  }
+  const key = slugify(label);
+  if(allCategories.some(c => c.key === key)){
+    showStatus('القسم ده موجود بالفعل.', 'error');
+    return;
+  }
+  try{
+    await db.collection('categories').add({ key, label, icon });
+    catName.value = '';
+    catIcon.value = '';
+    showStatus('تم إضافة القسم بنجاح ✓', 'success');
+  }catch(err){
+    console.error(err);
+    showStatus('حصل خطأ أثناء إضافة القسم.', 'error');
+  }
+});
+
+catList.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.delete-cat');
+  if(!btn) return;
+  const key = btn.dataset.key;
+  const cat = allCategories.find(c => c.key === key);
+  if(!cat || !cat.id) return;
+  if(confirm('متأكد إنك عايز تحذف القسم ده؟ (المنتجات اللي فيه مش هتتحذف بس مش هتبان في تبويب)')){
+    try{
+      await db.collection('categories').doc(cat.id).delete();
+    }catch(err){
+      console.error(err);
+      showStatus('حصل خطأ أثناء حذف القسم.', 'error');
+    }
+  }
+});
+
 /* ---------- فورم الإضافة/التعديل ---------- */
 const editId = document.getElementById('editId');
 const fName = document.getElementById('fName');
-const fCat = document.getElementById('fCat');
 const fBadge = document.getElementById('fBadge');
 const fPrice = document.getElementById('fPrice');
 const fOldPrice = document.getElementById('fOldPrice');
+const fQuantity = document.getElementById('fQuantity');
 const fDesc = document.getElementById('fDesc');
 const fIcon = document.getElementById('fIcon');
 const fOutOfStock = document.getElementById('fOutOfStock');
@@ -128,10 +211,11 @@ const formTitle = document.getElementById('formTitle');
 function resetForm(){
   editId.value = '';
   fName.value = '';
-  fCat.value = 'macchine';
+  fCat.value = allCategories[0].key;
   fBadge.value = '';
   fPrice.value = '';
   fOldPrice.value = '';
+  fQuantity.value = '';
   fDesc.value = '';
   fIcon.value = '';
   fOutOfStock.checked = false;
@@ -159,6 +243,7 @@ saveBtn.addEventListener('click', async () => {
     badge: fBadge.value || null,
     price,
     oldPrice: fOldPrice.value ? parseFloat(fOldPrice.value) : null,
+    quantity: fQuantity.value !== '' ? parseInt(fQuantity.value) : null,
     desc: fDesc.value.trim(),
     icon: fIcon.value.trim() || '🧴',
     outOfStock: fOutOfStock.checked,
@@ -194,37 +279,57 @@ saveBtn.addEventListener('click', async () => {
   }
 });
 
-/* ---------- عرض قائمة المنتجات الحالية ---------- */
+/* ---------- عرض قائمة المنتجات الحالية + البحث ---------- */
 const adminList = document.getElementById('adminList');
-const catLabels = {macchine:'Macchine', attrezzi:'Attrezzi', liquidi:'Liquidi'};
+const adminSearch = document.getElementById('adminSearch');
+let cachedProducts = [];
+
+function catLabel(key){
+  const c = allCategories.find(c => c.key === key);
+  return c ? c.label : key;
+}
+
+function renderAdminList(){
+  const q = adminSearch.value.trim().toLowerCase();
+  const list = q ? cachedProducts.filter(p => p.name.toLowerCase().includes(q)) : cachedProducts;
+
+  adminList.innerHTML = '';
+  if(cachedProducts.length === 0){
+    adminList.innerHTML = '<p style="color:var(--muted);">لسه مفيش منتجات مضافة. استخدم الفورم فوق عشان تضيف أول منتج.</p>';
+    return;
+  }
+  if(list.length === 0){
+    adminList.innerHTML = '<p style="color:var(--muted);">مفيش منتج بالاسم ده.</p>';
+    return;
+  }
+  list.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    const firstImg = (p.images && p.images[0]) || p.image;
+    const thumb = firstImg ? `<img src="${firstImg}" alt="${p.name}">` : (p.icon || '🧴');
+    const imgCount = p.images ? p.images.length : (p.image ? 1 : 0);
+    row.innerHTML = `
+      <div class="thumb">${thumb}</div>
+      <div class="info">
+        <h4>${p.name}${p.outOfStock ? ' <span style="color:#f87171;">(Esaurito)</span>' : ''}</h4>
+        <span>${catLabel(p.cat)} · €${p.price}${p.oldPrice ? ` (كان €${p.oldPrice})` : ''}${p.badge ? ' · ' + (p.badge === 'offerta' ? 'عرض' : 'الأكثر مبيعًا') : ''}${imgCount > 1 ? ` · ${imgCount} صور` : ''}${(p.quantity !== null && p.quantity !== undefined) ? ` · الكمية: ${p.quantity}` : ''}</span>
+      </div>
+      <div class="row-actions">
+        <button class="edit-btn" data-id="${p.id}" title="تعديل">✎</button>
+        <button class="delete-btn" data-id="${p.id}" title="حذف">🗑</button>
+      </div>
+    `;
+    adminList.appendChild(row);
+  });
+}
+
+adminSearch.addEventListener('input', renderAdminList);
 
 function listenToProducts(){
+  loadCategories();
   db.collection('products').onSnapshot(snapshot => {
-    adminList.innerHTML = '';
-    if(snapshot.empty){
-      adminList.innerHTML = '<p style="color:var(--muted);">لسه مفيش منتجات مضافة. استخدم الفورم فوق عشان تضيف أول منتج.</p>';
-      return;
-    }
-    snapshot.forEach(doc => {
-      const p = { id: doc.id, ...doc.data() };
-      const row = document.createElement('div');
-      row.className = 'admin-row';
-      const firstImg = (p.images && p.images[0]) || p.image;
-      const thumb = firstImg ? `<img src="${firstImg}" alt="${p.name}">` : (p.icon || '🧴');
-      const imgCount = p.images ? p.images.length : (p.image ? 1 : 0);
-      row.innerHTML = `
-        <div class="thumb">${thumb}</div>
-        <div class="info">
-          <h4>${p.name}${p.outOfStock ? ' <span style="color:#f87171;">(Esaurito)</span>' : ''}</h4>
-          <span>${catLabels[p.cat] || p.cat} · €${p.price}${p.oldPrice ? ` (كان €${p.oldPrice})` : ''}${p.badge ? ' · ' + (p.badge === 'offerta' ? 'عرض' : 'الأكثر مبيعًا') : ''}${imgCount > 1 ? ` · ${imgCount} صور` : ''}</span>
-        </div>
-        <div class="row-actions">
-          <button class="edit-btn" data-id="${p.id}" title="تعديل">✎</button>
-          <button class="delete-btn" data-id="${p.id}" title="حذف">🗑</button>
-        </div>
-      `;
-      adminList.appendChild(row);
-    });
+    cachedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderAdminList();
   });
 }
 
@@ -239,10 +344,11 @@ adminList.addEventListener('click', async (e) => {
     const p = doc.data();
     editId.value = id;
     fName.value = p.name || '';
-    fCat.value = p.cat || 'macchine';
+    fCat.value = p.cat || allCategories[0].key;
     fBadge.value = p.badge || '';
     fPrice.value = p.price ?? '';
     fOldPrice.value = p.oldPrice ?? '';
+    fQuantity.value = (p.quantity !== null && p.quantity !== undefined) ? p.quantity : '';
     fDesc.value = p.desc || '';
     fIcon.value = p.icon || '';
     fOutOfStock.checked = !!p.outOfStock;
