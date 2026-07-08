@@ -310,6 +310,7 @@ nav a:hover::after{width:100%;}
 .prod-body{padding:18px;}
 .prod-body h3{font-size:1.05rem;margin-bottom:6px;}
 .prod-body .desc{color:var(--muted);font-size:.8rem;margin-bottom:14px;line-height:1.5;}
+.low-stock{color:var(--gold);font-size:.78rem;font-weight:600;margin:-8px 0 10px;}
 .prod-row{display:flex;align-items:center;justify-content:space-between;}
 .prod-price{color:var(--green);font-weight:700;font-size:1.1rem;}
 .add-btn{
