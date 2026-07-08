@@ -41,6 +41,7 @@ auth && auth.onAuthStateChanged(user => {
     loginScreen.style.display = 'none';
     adminPanel.style.display = 'block';
     listenToProducts();
+    listenToServices();
   } else {
     loginScreen.style.display = 'block';
     adminPanel.style.display = 'none';
@@ -190,6 +191,138 @@ catList.addEventListener('click', async (e) => {
     }catch(err){
       console.error(err);
       showStatus('حصل خطأ أثناء حذف القسم.', 'error');
+    }
+  }
+});
+
+/* ---------- إدارة الخدمات (Servizi) ---------- */
+const defaultServices = [
+  {name:'Pulizia Casa', icon:'🏠', desc:'Pulizia completa per appartamenti e ville.', priceLabel:'A partire da €40'},
+  {name:'Pulizia Uffici', icon:'🏢', desc:'Servizi professionali per uffici e negozi.', priceLabel:'A partire da €60'},
+  {name:'Riparazione Macchine', icon:'🔧', desc:'Riparazione e manutenzione macchine per la pulizia.', priceLabel:'Preventivo Gratuito'},
+  {name:'Consegna a Domicilio', icon:'🚚', desc:'Consegna rapida in tutta la zona di Milano.', priceLabel:'Gratuita sopra €50'},
+];
+
+const servName = document.getElementById('servName');
+const servIcon = document.getElementById('servIcon');
+const servPriceLabel = document.getElementById('servPriceLabel');
+const servDesc = document.getElementById('servDesc');
+const servEditId = document.getElementById('servEditId');
+const saveServBtn = document.getElementById('saveServBtn');
+const cancelServEditBtn = document.getElementById('cancelServEditBtn');
+const servFormTitle = document.getElementById('servFormTitle');
+const servList = document.getElementById('servList');
+
+function resetServForm(){
+  servEditId.value = '';
+  servName.value = '';
+  servIcon.value = '';
+  servPriceLabel.value = '';
+  servDesc.value = '';
+  servFormTitle.textContent = 'Aggiungi Nuovo Servizio';
+  cancelServEditBtn.style.display = 'none';
+}
+
+cancelServEditBtn.addEventListener('click', resetServForm);
+
+saveServBtn.addEventListener('click', async () => {
+  const name = servName.value.trim();
+  if(!name){
+    showStatus('اكتب اسم الخدمة الأول.', 'error');
+    return;
+  }
+  const data = {
+    name,
+    icon: servIcon.value.trim() || '🧽',
+    priceLabel: servPriceLabel.value.trim() || 'Contattaci per il prezzo',
+    desc: servDesc.value.trim(),
+  };
+  saveServBtn.disabled = true;
+  saveServBtn.textContent = 'جاري الحفظ...';
+  try{
+    if(servEditId.value){
+      await db.collection('services').doc(servEditId.value).update(data);
+      showStatus('تم تعديل الخدمة بنجاح ✓', 'success');
+    } else {
+      await db.collection('services').add(data);
+      showStatus('تم إضافة الخدمة بنجاح ✓', 'success');
+    }
+    resetServForm();
+  }catch(err){
+    console.error(err);
+    showStatus('حصل خطأ أثناء حفظ الخدمة.', 'error');
+  }finally{
+    saveServBtn.disabled = false;
+    saveServBtn.textContent = 'Salva Servizio';
+  }
+});
+
+async function seedDefaultServicesIfEmpty(snapshot){
+  if(!snapshot.empty) return;
+  try{
+    const batchPromises = defaultServices.map(s => db.collection('services').add(s));
+    await Promise.all(batchPromises);
+  }catch(err){
+    console.error('تعذر إنشاء الخدمات الافتراضية:', err);
+  }
+}
+
+function listenToServices(){
+  db.collection('services').onSnapshot(async snapshot => {
+    if(snapshot.empty){
+      await seedDefaultServicesIfEmpty(snapshot);
+      return; // الـ onSnapshot هيتفعل تاني تلقائي بعد الإضافة
+    }
+    servList.innerHTML = '';
+    snapshot.forEach(doc => {
+      const s = { id: doc.id, ...doc.data() };
+      const row = document.createElement('div');
+      row.className = 'admin-row';
+      row.innerHTML = `
+        <div class="thumb">${s.icon || '🧽'}</div>
+        <div class="info">
+          <h4>${s.name}</h4>
+          <span>${s.priceLabel || ''}</span>
+        </div>
+        <div class="row-actions">
+          <button class="edit-serv-btn" data-id="${s.id}" title="تعديل">✎</button>
+          <button class="delete-serv-btn" data-id="${s.id}" title="حذف">🗑</button>
+        </div>
+      `;
+      servList.appendChild(row);
+    });
+  });
+}
+
+servList.addEventListener('click', async (e) => {
+  const editBtn = e.target.closest('.edit-serv-btn');
+  const delBtn = e.target.closest('.delete-serv-btn');
+
+  if(editBtn){
+    const id = editBtn.dataset.id;
+    const doc = await db.collection('services').doc(id).get();
+    if(!doc.exists) return;
+    const s = doc.data();
+    servEditId.value = id;
+    servName.value = s.name || '';
+    servIcon.value = s.icon || '';
+    servPriceLabel.value = s.priceLabel || '';
+    servDesc.value = s.desc || '';
+    servFormTitle.textContent = 'تعديل الخدمة: ' + s.name;
+    cancelServEditBtn.style.display = 'inline-block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  if(delBtn){
+    const id = delBtn.dataset.id;
+    if(confirm('متأكد إنك عايز تحذف الخدمة دي؟')){
+      try{
+        await db.collection('services').doc(id).delete();
+        showStatus('تم حذف الخدمة.', 'success');
+      }catch(err){
+        console.error(err);
+        showStatus('حصل خطأ أثناء حذف الخدمة.', 'error');
+      }
     }
   }
 });
