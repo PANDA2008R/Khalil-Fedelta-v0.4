@@ -14,6 +14,20 @@ body{
   background:var(--bg);
   color:var(--text);
   font-family:'Poppins',sans-serif;
+  position:relative;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% 0%, rgba(34,197,94,.05), transparent 60%),
+    radial-gradient(ellipse 900px 500px at 85% 100%, rgba(34,197,94,.045), transparent 60%);
+  background-size:100% 100%;
+  animation:ambientDrift 22s ease-in-out infinite;
+}
+@keyframes ambientDrift{
+  0%,100%{opacity:.7;}
+  50%{opacity:1;}
 }
 a{color:inherit;text-decoration:none;}
 ul{list-style:none;}
@@ -188,6 +202,11 @@ nav a:hover::after{width:100%;}
   display:flex;align-items:center;gap:10px;
   background:var(--surface);border:1px solid var(--line);border-radius:10px;
   padding:14px 18px;max-width:600px;margin:0 auto 20px;
+  transition:border-color .2s, box-shadow .2s;
+}
+.search-panel .search-box:focus-within{
+  border-color:rgba(34,197,94,.5);
+  box-shadow:0 0 0 3px rgba(34,197,94,.12);
 }
 .search-panel input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:1rem;}
 .search-panel input::placeholder{color:var(--muted);}
@@ -346,13 +365,20 @@ nav a:hover::after{width:100%;}
 .serv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:26px;max-width:1200px;margin:0 auto;}
 .serv-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:30px 24px;transition:.3s;}
 .serv-card:hover{border-color:var(--green);transform:translateY(-6px);}
-.serv-card .icon{font-size:2.2rem;margin-bottom:14px;display:block;}
+.serv-card .icon{
+  font-size:2rem;margin-bottom:14px;
+  width:64px;height:64px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg, var(--surface2), var(--bg));
+  border:1px solid var(--line);
+}
 .tilt-icon{
-  display:inline-block;cursor:pointer;
-  transition:transform .15s ease-out;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:transform .15s ease-out, box-shadow .15s ease-out;
   transform-style:preserve-3d;
   will-change:transform;
 }
+.tilt-icon:hover{box-shadow:0 10px 24px -8px rgba(34,197,94,.35);}
 .serv-card h3{font-size:1.1rem;font-weight:700;margin-bottom:8px;}
 .serv-card p{color:var(--muted);font-size:.85rem;margin-bottom:10px;line-height:1.5;}
 .serv-card .price-tag{color:var(--green);font-weight:700;font-size:.9rem;margin-bottom:18px;display:block;}
@@ -425,6 +451,9 @@ footer{border-top:1px solid var(--line);padding:40px 5%;text-align:center;color:
 button:focus-visible, a:focus-visible, input:focus-visible{
   outline:2px solid var(--green);
   outline-offset:2px;
+}
+#searchInput:focus-visible, #searchInput:focus{
+  outline:none;
 }
 
 /* ---------- تأثير إضافي على الصور والكروت ---------- */
