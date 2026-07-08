@@ -35,14 +35,17 @@
   #loginScreen h2{font-size:1.4rem;margin-bottom:8px;}
   #loginScreen p{color:var(--muted);font-size:.9rem;margin-bottom:26px;}
   .login-card{
-    background:var(--surface);
-    border:1px solid var(--line);
+    background:rgba(20,26,38,.55);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(34,197,94,.25);
     border-radius:16px;
     padding:28px 24px;
-    box-shadow:0 16px 40px -12px rgba(0,0,0,.5), 0 0 0 1px rgba(34,197,94,.08);
+    box-shadow:0 16px 40px -12px rgba(0,0,0,.5);
     transition:.3s;
   }
-  .login-card:hover{border-color:rgba(34,197,94,.35);box-shadow:0 20px 48px -12px rgba(0,0,0,.55), 0 0 0 1px rgba(34,197,94,.15);}
+  .login-card:hover{border-color:rgba(34,197,94,.4);}
+  .login-card .field input{background:rgba(27,35,51,.6);}
   .login-card .field:last-of-type{margin-bottom:20px;}
   .field{margin-bottom:16px;text-align:left;}
   .field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;}
@@ -90,6 +93,15 @@
     display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text);cursor:pointer;
   }
   .checkbox-label input{width:auto;accent-color:var(--green);}
+
+  .cat-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
+  .cat-chip{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface2);border:1px solid var(--line);
+    padding:8px 14px;border-radius:20px;font-size:.85rem;
+  }
+  .cat-chip .default-tag{color:var(--muted);font-size:.7rem;}
+  .cat-chip .delete-cat{background:none;border:none;color:#f87171;cursor:pointer;font-size:.9rem;padding:0 2px;}
 
   .list-title{font-size:1.15rem;font-weight:700;margin-bottom:16px;}
   .admin-list{display:flex;flex-direction:column;gap:12px;}
@@ -156,6 +168,22 @@
   <div class="status-msg" id="statusMsg"></div>
 
   <div class="form-card">
+    <h2>Aggiungi Nuova Categoria</h2>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Nome categoria (es. Accessori Auto)</label>
+        <input type="text" id="catName" placeholder="Nome della nuova categoria">
+      </div>
+      <div class="field full">
+        <label>Emoji della categoria</label>
+        <input type="text" id="catIcon" placeholder="es. 🚗" maxlength="4">
+      </div>
+    </div>
+    <button class="primary-btn ripple-btn" id="addCatBtn" style="margin-top:16px;">Aggiungi Categoria</button>
+    <div class="cat-list" id="catList"></div>
+  </div>
+
+  <div class="form-card">
     <h2 id="formTitle">Aggiungi Nuovo Prodotto</h2>
     <input type="hidden" id="editId" value="">
     <div class="form-grid">
@@ -165,11 +193,7 @@
       </div>
       <div class="field">
         <label>Categoria</label>
-        <select id="fCat">
-          <option value="macchine">🛠️ Macchine di Pulizia</option>
-          <option value="attrezzi">🧹 Attrezzi di Pulizia</option>
-          <option value="liquidi">🧴 Prodotti Liquidi</option>
-        </select>
+        <select id="fCat"></select>
       </div>
       <div class="field">
         <label>Badge (opzionale)</label>
@@ -186,6 +210,10 @@
       <div class="field">
         <label>Prezzo prima dell'offerta (opzionale)</label>
         <input type="number" id="fOldPrice" placeholder="lascia vuoto se nessuna offerta" step="0.01">
+      </div>
+      <div class="field">
+        <label>Quantità disponibile (opzionale)</label>
+        <input type="number" id="fQuantity" placeholder="es. 10" min="0" step="1">
       </div>
       <div class="field full">
         <label>Descrizione breve</label>
@@ -214,6 +242,9 @@
   </div>
 
   <div class="list-title">Prodotti Attuali</div>
+  <div class="field" style="margin-bottom:18px;">
+    <input type="text" id="adminSearch" placeholder="🔍 Cerca un prodotto per nome...">
+  </div>
   <div class="admin-list" id="adminList"></div>
 </div>
 
