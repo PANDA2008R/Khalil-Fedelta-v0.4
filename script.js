@@ -204,6 +204,7 @@ function buildProductCard(p){
   const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
   const media = imgs.length ? `<img src="${imgs[0]}" alt="${p.name}">` : (p.icon || '🧴');
   const outClass = p.outOfStock ? ' out-of-stock' : '';
+  const lowStock = (!p.outOfStock && p.quantity !== null && p.quantity !== undefined && p.quantity > 0 && p.quantity <= 5);
   card.innerHTML = `
     <div class="prod-img${outClass}" data-id="${p.id}">
       ${p.badge && !p.outOfStock ? `<span class="mini-badge ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Top'}</span>` : ''}
@@ -212,6 +213,7 @@ function buildProductCard(p){
     <div class="prod-body">
       <h3>${p.name}</h3>
       <p class="desc">${p.desc || ''}</p>
+      ${lowStock ? `<p class="low-stock">⚡ Rimangono solo ${p.quantity}!</p>` : ''}
       <div class="prod-row">
         <span class="prod-price">€${p.price}${p.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:.8rem;">€${p.oldPrice}</span>` : ''}</span>
         <button class="add-btn ripple-btn${p.outOfStock ? ' disabled' : ''}" data-id="${p.id}" ${p.outOfStock ? 'disabled' : ''}>${p.outOfStock ? 'Esaurito' : 'Aggiungi'}</button>
@@ -221,15 +223,50 @@ function buildProductCard(p){
   return card;
 }
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentCat = btn.dataset.cat;
-    currentPage = 1;
-    renderGrid();
+/* ============================================
+   الأقسام (الكاتيجوريز) — ثابتة + أي قسم يضيفه الأدمن
+   ============================================ */
+const defaultCategories = [
+  {key:'macchine', label:'Macchine di Pulizia', icon:'🛠️'},
+  {key:'attrezzi', label:'Attrezzi di Pulizia', icon:'🧹'},
+  {key:'liquidi', label:'Prodotti Liquidi', icon:'🧴'},
+];
+let allCategories = [...defaultCategories];
+const tabsEl = document.getElementById('tabs');
+
+function buildTabs(){
+  tabsEl.innerHTML = '';
+  allCategories.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (c.key === currentCat ? ' active' : '');
+    btn.dataset.cat = c.key;
+    btn.textContent = `${c.icon} ${c.label}`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCat = c.key;
+      currentPage = 1;
+      renderGrid();
+    });
+    tabsEl.appendChild(btn);
   });
-});
+}
+
+function loadCategories(){
+  if(typeof db === 'undefined' || !db){
+    buildTabs();
+    return;
+  }
+  db.collection('categories').onSnapshot(
+    snapshot => {
+      const extra = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      allCategories = [...defaultCategories, ...extra];
+      buildTabs();
+    },
+    () => buildTabs()
+  );
+}
+loadCategories();
 
 grid.addEventListener('click', e => {
   const btn = e.target.closest('.add-btn');
@@ -482,6 +519,12 @@ function openDetailModal(id){
 
   detailName.textContent = product.name;
   detailDesc.textContent = product.desc || '';
+  const existingLowStock = document.getElementById('detailLowStock');
+  if(existingLowStock) existingLowStock.remove();
+  const lowStockNow = (!product.outOfStock && product.quantity !== null && product.quantity !== undefined && product.quantity > 0 && product.quantity <= 5);
+  if(lowStockNow){
+    detailDesc.insertAdjacentHTML('afterend', `<p class="low-stock" id="detailLowStock">⚡ Rimangono solo ${product.quantity}!</p>`);
+  }
   detailPrice.innerHTML = `€${product.price}` + (product.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:1rem;">€${product.oldPrice}</span>` : '');
 
   if(product.badge && !product.outOfStock){
