@@ -22,12 +22,13 @@ const defaultProducts = [
   {id:"d6", name:"Lucido Vetri", cat:"liquidi", price:7, oldPrice:null, desc:"Pulizia senza aloni per vetri e specchi.", icon:"🪟", image:null, badge:"bestseller"},
 ];
 
-const services = [
-  {name:"Pulizia Casa", icon:"🏠", desc:"Pulizia completa per appartamenti e ville.", priceLabel:"A partire da €40"},
-  {name:"Pulizia Uffici", icon:"🏢", desc:"Servizi professionali per uffici e negozi.", priceLabel:"A partire da €60"},
-  {name:"Riparazione Macchine", icon:"🔧", desc:"Riparazione e manutenzione macchine per la pulizia.", priceLabel:"Preventivo Gratuito"},
-  {name:"Consegna a Domicilio", icon:"🚚", desc:"Consegna rapida in tutta la zona di Milano.", priceLabel:"Gratuita sopra €50"},
+const defaultServices = [
+  {id:"s1", name:"Pulizia Casa", icon:"🏠", desc:"Pulizia completa per appartamenti e ville.", priceLabel:"A partire da €40"},
+  {id:"s2", name:"Pulizia Uffici", icon:"🏢", desc:"Servizi professionali per uffici e negozi.", priceLabel:"A partire da €60"},
+  {id:"s3", name:"Riparazione Macchine", icon:"🔧", desc:"Riparazione e manutenzione macchine per la pulizia.", priceLabel:"Preventivo Gratuito"},
+  {id:"s4", name:"Consegna a Domicilio", icon:"🚚", desc:"Consegna rapida in tutta la zona di Milano.", priceLabel:"Gratuita sopra €50"},
 ];
+let services = [...defaultServices];
 
 let products = [];
 let featured = [];
@@ -204,7 +205,7 @@ function buildProductCard(p){
   const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
   const media = imgs.length ? `<img src="${imgs[0]}" alt="${p.name}">` : (p.icon || '🧴');
   const outClass = p.outOfStock ? ' out-of-stock' : '';
-  const lowStock = (!p.outOfStock && p.quantity !== null && p.quantity !== undefined && p.quantity > 0 && p.quantity <= 5);
+  const hasStockNumber = (!p.outOfStock && p.quantity !== null && p.quantity !== undefined && p.quantity >= 0);
   card.innerHTML = `
     <div class="prod-img${outClass}" data-id="${p.id}">
       ${p.badge && !p.outOfStock ? `<span class="mini-badge ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Top'}</span>` : ''}
@@ -212,8 +213,7 @@ function buildProductCard(p){
     </div>
     <div class="prod-body">
       <h3>${p.name}</h3>
-      <p class="desc">${p.desc || ''}</p>
-      ${lowStock ? `<p class="low-stock">⚡ Rimangono solo ${p.quantity}!</p>` : ''}
+      ${hasStockNumber ? `<span class="stock-pill">⚡ Rimangono ${p.quantity}</span>` : ''}
       <div class="prod-row">
         <span class="prod-price">€${p.price}${p.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:.8rem;">€${p.oldPrice}</span>` : ''}</span>
         <button class="add-btn ripple-btn${p.outOfStock ? ' disabled' : ''}" data-id="${p.id}" ${p.outOfStock ? 'disabled' : ''}>${p.outOfStock ? 'Esaurito' : 'Aggiungi'}</button>
@@ -311,21 +311,41 @@ function loadProducts(){
 loadProducts();
 
 /* ============================================
-   SERVIZI
+   SERVIZI — من Firebase (أو الافتراضية لو مفيش بيانات)
    ============================================ */
 const servGrid = document.getElementById('servGrid');
-services.forEach(s => {
-  const card = document.createElement('div');
-  card.className = 'serv-card';
-  card.innerHTML = `
-    <span class="icon">${s.icon}</span>
-    <h3>${s.name}</h3>
-    <p>${s.desc}</p>
-    <span class="price-tag">${s.priceLabel}</span>
-    <button class="prenota-btn ripple-btn" data-service="${s.name}">Prenota su WhatsApp</button>
-  `;
-  servGrid.appendChild(card);
-});
+
+function renderServices(){
+  servGrid.innerHTML = '';
+  services.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'serv-card';
+    card.innerHTML = `
+      <span class="icon tilt-icon">${s.icon}</span>
+      <h3>${s.name}</h3>
+      <p>${s.desc}</p>
+      <span class="price-tag">${s.priceLabel}</span>
+      <button class="prenota-btn ripple-btn" data-service="${s.name}">Prenota su WhatsApp</button>
+    `;
+    servGrid.appendChild(card);
+  });
+  initTiltIcons();
+}
+
+function loadServices(){
+  if(typeof db === 'undefined' || !db){
+    renderServices();
+    return;
+  }
+  db.collection('services').onSnapshot(
+    snapshot => {
+      services = snapshot.empty ? [...defaultServices] : snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderServices();
+    },
+    () => renderServices()
+  );
+}
+loadServices();
 
 servGrid.addEventListener('click', e => {
   const btn = e.target.closest('.prenota-btn');
@@ -334,6 +354,29 @@ servGrid.addEventListener('click', e => {
   const message = `Ciao ${STORE_NAME}! 👋\nVorrei prenotare il seguente servizio:\n\n*${service}*\n\nPotete darmi maggiori informazioni e disponibilità? Grazie!`;
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 });
+
+/* ============================================
+   تأثير 3D Tilt للأيقونات عند الوقوف بالماوس
+   ============================================ */
+function initTiltIcons(){
+  document.querySelectorAll('.tilt-icon').forEach(el => {
+    if(el.dataset.tiltBound) return;
+    el.dataset.tiltBound = 'true';
+    el.addEventListener('mousemove', e => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const midX = rect.width / 2;
+      const midY = rect.height / 2;
+      const rotateY = ((x - midX) / midX) * 18;
+      const rotateX = -((y - midY) / midY) * 18;
+      el.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.15)`;
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transform = '';
+    });
+  });
+}
 
 /* ============================================
    RICERCA
@@ -521,9 +564,9 @@ function openDetailModal(id){
   detailDesc.textContent = product.desc || '';
   const existingLowStock = document.getElementById('detailLowStock');
   if(existingLowStock) existingLowStock.remove();
-  const lowStockNow = (!product.outOfStock && product.quantity !== null && product.quantity !== undefined && product.quantity > 0 && product.quantity <= 5);
+  const lowStockNow = (!product.outOfStock && product.quantity !== null && product.quantity !== undefined && product.quantity >= 0);
   if(lowStockNow){
-    detailDesc.insertAdjacentHTML('afterend', `<p class="low-stock" id="detailLowStock">⚡ Rimangono solo ${product.quantity}!</p>`);
+    detailDesc.insertAdjacentHTML('afterend', `<span class="stock-pill" id="detailLowStock">⚡ Rimangono ${product.quantity}</span>`);
   }
   detailPrice.innerHTML = `€${product.price}` + (product.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:1rem;">€${product.oldPrice}</span>` : '');
 
