@@ -211,6 +211,8 @@ function buildProductCard(p){
   const media = imgs.length ? `<img src="${imgs[0]}" alt="${p.name}">` : (p.icon || '🧴');
   const outClass = p.outOfStock ? ' out-of-stock' : '';
   const hasStockNumber = (!p.outOfStock && p.quantity !== null && p.quantity !== undefined && p.quantity >= 0);
+  const hasVariants = p.variants && p.variants.length > 0;
+  const shortDesc = p.desc ? (p.desc.length > 55 ? p.desc.slice(0, 55) + '…' : p.desc) : '';
   card.innerHTML = `
     <div class="prod-img${outClass}" data-id="${p.id}">
       ${p.badge && !p.outOfStock ? `<span class="mini-badge ${p.badge}">${p.badge === 'offerta' ? 'Offerta' : 'Top'}</span>` : ''}
@@ -218,10 +220,12 @@ function buildProductCard(p){
     </div>
     <div class="prod-body">
       <h3>${p.name}</h3>
+      ${shortDesc ? `<p class="desc-preview">${shortDesc} <span class="read-more">Vedi di più</span></p>` : ''}
+      ${hasVariants ? `<span class="variant-hint">🌸 Disponibile in più opzioni</span>` : ''}
       ${hasStockNumber ? `<span class="stock-pill">⚡ Rimangono ${p.quantity}</span>` : ''}
       <div class="prod-row">
         <span class="prod-price">€${p.price}${p.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:.8rem;">€${p.oldPrice}</span>` : ''}</span>
-        <button class="add-btn ripple-btn${p.outOfStock ? ' disabled' : ''}" data-id="${p.id}" ${p.outOfStock ? 'disabled' : ''}>${p.outOfStock ? 'Esaurito' : 'Aggiungi'}</button>
+        <button class="add-btn ripple-btn${p.outOfStock ? ' disabled' : ''}" data-id="${p.id}" ${p.outOfStock ? 'disabled' : ''}>${p.outOfStock ? 'Esaurito' : (hasVariants ? 'Scegli' : 'Aggiungi')}</button>
       </div>
     </div>
   `;
@@ -330,9 +334,9 @@ function renderServices(){
   servGrid.innerHTML = '';
   services.forEach(s => {
     const card = document.createElement('div');
-    card.className = 'serv-card';
+    card.className = 'serv-card tilt-icon';
     card.innerHTML = `
-      <span class="icon tilt-icon">${s.icon}</span>
+      <span class="icon">${s.icon}</span>
       <h3>${s.name}</h3>
       <p>${s.desc}</p>
       <span class="price-tag">${s.priceLabel}</span>
@@ -557,6 +561,10 @@ function loadSiteInfo(){
 
     const socialEl = document.getElementById('footerSocial');
     socialEl.innerHTML = '';
+    if(d.whatsapp){
+      const waMsg = encodeURIComponent('Ciao ' + STORE_NAME + '! Vorrei maggiori informazioni.');
+      socialEl.innerHTML += `<a href="https://wa.me/${d.whatsapp}?text=${waMsg}" target="_blank" rel="noopener" title="WhatsApp">💬</a>`;
+    }
     if(d.facebook){
       socialEl.innerHTML += `<a href="${d.facebook}" target="_blank" rel="noopener" title="Facebook">📘</a>`;
     }
@@ -633,7 +641,8 @@ function openDetailModal(id){
 
   if(product.variants && product.variants.length > 0){
     detailVariantField.style.display = 'block';
-    detailVariantSelect.innerHTML = product.variants.map(v => `<option value="${v}">${v}</option>`).join('');
+    detailVariantSelect.innerHTML = `<option value="" disabled selected>-- Seleziona una profumazione/opzione --</option>` +
+      product.variants.map(v => `<option value="${v}">${v}</option>`).join('');
   } else {
     detailVariantField.style.display = 'none';
     detailVariantSelect.innerHTML = '';
@@ -663,7 +672,11 @@ function openDetailModal(id){
 
 function renderDetailImage(){
   const imgs = (detailProduct.images && detailProduct.images.length) ? detailProduct.images : (detailProduct.image ? [detailProduct.image] : []);
-  detailImg.innerHTML = imgs.length ? `<img src="${imgs[detailImgIndex]}" alt="${detailProduct.name}">` : (detailProduct.icon || '🧴');
+  detailImg.classList.add('fading');
+  setTimeout(() => {
+    detailImg.innerHTML = imgs.length ? `<img src="${imgs[detailImgIndex]}" alt="${detailProduct.name}">` : (detailProduct.icon || '🧴');
+    detailImg.classList.remove('fading');
+  }, 180);
 
   detailDots.innerHTML = '';
   detailPrev.style.display = imgs.length > 1 ? 'flex' : 'none';
@@ -699,7 +712,13 @@ detailNext.addEventListener('click', () => {
 
 detailAddBtn.addEventListener('click', () => {
   if(!detailProduct || detailProduct.outOfStock) return;
-  const selectedVariant = (detailProduct.variants && detailProduct.variants.length > 0) ? detailVariantSelect.value : null;
+  const hasVariants = detailProduct.variants && detailProduct.variants.length > 0;
+  const selectedVariant = hasVariants ? detailVariantSelect.value : null;
+  if(hasVariants && !selectedVariant){
+    detailVariantSelect.style.borderColor = '#f87171';
+    showToast('Seleziona prima un\'opzione ⚠️');
+    return;
+  }
   addToCart(detailProduct.id, selectedVariant);
 });
 
