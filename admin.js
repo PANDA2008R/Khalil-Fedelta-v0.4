@@ -36,12 +36,23 @@ loginBtn.addEventListener('click', () => {
 
 logoutBtn.addEventListener('click', () => auth.signOut());
 
+/* ---------- التبديل بين تابات لوحة التحكم ---------- */
+document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
 auth && auth.onAuthStateChanged(user => {
   if(user){
     loginScreen.style.display = 'none';
     adminPanel.style.display = 'block';
     listenToProducts();
     listenToServices();
+    loadSiteInfo();
   } else {
     loginScreen.style.display = 'block';
     adminPanel.style.display = 'none';
@@ -207,6 +218,7 @@ const servName = document.getElementById('servName');
 const servIcon = document.getElementById('servIcon');
 const servPriceLabel = document.getElementById('servPriceLabel');
 const servDesc = document.getElementById('servDesc');
+const servDisabled = document.getElementById('servDisabled');
 const servEditId = document.getElementById('servEditId');
 const saveServBtn = document.getElementById('saveServBtn');
 const cancelServEditBtn = document.getElementById('cancelServEditBtn');
@@ -219,6 +231,7 @@ function resetServForm(){
   servIcon.value = '';
   servPriceLabel.value = '';
   servDesc.value = '';
+  servDisabled.checked = false;
   servFormTitle.textContent = 'Aggiungi Nuovo Servizio';
   cancelServEditBtn.style.display = 'none';
 }
@@ -236,6 +249,7 @@ saveServBtn.addEventListener('click', async () => {
     icon: servIcon.value.trim() || '🧽',
     priceLabel: servPriceLabel.value.trim() || 'Contattaci per il prezzo',
     desc: servDesc.value.trim(),
+    disabled: servDisabled.checked,
   };
   saveServBtn.disabled = true;
   saveServBtn.textContent = 'جاري الحفظ...';
@@ -281,7 +295,7 @@ function listenToServices(){
       row.innerHTML = `
         <div class="thumb">${s.icon || '🧽'}</div>
         <div class="info">
-          <h4>${s.name}</h4>
+          <h4>${s.name}${s.disabled ? ' <span style="color:#f87171;">(معطّل)</span>' : ''}</h4>
           <span>${s.priceLabel || ''}</span>
         </div>
         <div class="row-actions">
@@ -308,6 +322,7 @@ servList.addEventListener('click', async (e) => {
     servIcon.value = s.icon || '';
     servPriceLabel.value = s.priceLabel || '';
     servDesc.value = s.desc || '';
+    servDisabled.checked = !!s.disabled;
     servFormTitle.textContent = 'تعديل الخدمة: ' + s.name;
     cancelServEditBtn.style.display = 'inline-block';
     window.scrollTo({top:0, behavior:'smooth'});
@@ -341,6 +356,42 @@ const saveBtn = document.getElementById('saveBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formTitle = document.getElementById('formTitle');
 
+/* ---------- الفاريانتس (زي الروايح أو الألوان) ---------- */
+const variantInput = document.getElementById('variantInput');
+const addVariantBtn = document.getElementById('addVariantBtn');
+const variantList = document.getElementById('variantList');
+let currentVariants = [];
+
+function renderVariantList(){
+  variantList.innerHTML = '';
+  currentVariants.forEach((v, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'variant-chip';
+    chip.innerHTML = `<span>${v}</span><button type="button" data-idx="${i}">✕</button>`;
+    variantList.appendChild(chip);
+  });
+}
+
+addVariantBtn.addEventListener('click', () => {
+  const v = variantInput.value.trim();
+  if(!v) return;
+  if(currentVariants.includes(v)){ variantInput.value=''; return; }
+  currentVariants.push(v);
+  variantInput.value = '';
+  renderVariantList();
+});
+
+variantInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){ e.preventDefault(); addVariantBtn.click(); }
+});
+
+variantList.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentVariants.splice(parseInt(btn.dataset.idx), 1);
+  renderVariantList();
+});
+
 function resetForm(){
   editId.value = '';
   fName.value = '';
@@ -353,6 +404,8 @@ function resetForm(){
   fIcon.value = '';
   fOutOfStock.checked = false;
   currentImages = [];
+  currentVariants = [];
+  renderVariantList();
   fImages.value = '';
   renderGalleryPreview();
   formTitle.textContent = 'Aggiungi Nuovo Prodotto';
@@ -380,6 +433,7 @@ saveBtn.addEventListener('click', async () => {
     desc: fDesc.value.trim(),
     icon: fIcon.value.trim() || '🧴',
     outOfStock: fOutOfStock.checked,
+    variants: [...currentVariants],
   };
 
   // لو المستخدم اختار صور جديدة، حطها. لو بيعدل منتج ومحطش صور جديدة، سيب القديمة زي ما هي
@@ -485,6 +539,8 @@ adminList.addEventListener('click', async (e) => {
     fDesc.value = p.desc || '';
     fIcon.value = p.icon || '';
     fOutOfStock.checked = !!p.outOfStock;
+    currentVariants = p.variants ? [...p.variants] : [];
+    renderVariantList();
     currentImages = p.images ? [...p.images] : (p.image ? [p.image] : []);
     renderGalleryPreview();
     formTitle.textContent = 'تعديل المنتج: ' + p.name;
@@ -519,4 +575,50 @@ document.addEventListener('click', e => {
   circle.style.top = (e.clientY - rect.top - size / 2) + 'px';
   btn.appendChild(circle);
   setTimeout(() => circle.remove(), 600);
+});
+
+/* ---------- إدارة معلومات "Chi Siamo" والتواصل ---------- */
+const infoAbout = document.getElementById('infoAbout');
+const infoAddress = document.getElementById('infoAddress');
+const infoWhatsapp = document.getElementById('infoWhatsapp');
+const infoFacebook = document.getElementById('infoFacebook');
+const infoInstagram = document.getElementById('infoInstagram');
+const saveInfoBtn = document.getElementById('saveInfoBtn');
+
+async function loadSiteInfo(){
+  try{
+    const doc = await db.collection('siteInfo').doc('main').get();
+    if(doc.exists){
+      const d = doc.data();
+      infoAbout.value = d.about || '';
+      infoAddress.value = d.address || '';
+      infoWhatsapp.value = d.whatsapp || '';
+      infoFacebook.value = d.facebook || '';
+      infoInstagram.value = d.instagram || '';
+    }
+  }catch(err){
+    console.error('تعذر تحميل معلومات الموقع:', err);
+  }
+}
+
+saveInfoBtn.addEventListener('click', async () => {
+  const data = {
+    about: infoAbout.value.trim(),
+    address: infoAddress.value.trim(),
+    whatsapp: infoWhatsapp.value.trim(),
+    facebook: infoFacebook.value.trim(),
+    instagram: infoInstagram.value.trim(),
+  };
+  saveInfoBtn.disabled = true;
+  saveInfoBtn.textContent = 'جاري الحفظ...';
+  try{
+    await db.collection('siteInfo').doc('main').set(data, {merge:true});
+    showStatus('تم حفظ المعلومات بنجاح ✓', 'success');
+  }catch(err){
+    console.error(err);
+    showStatus('حصل خطأ أثناء الحفظ.', 'error');
+  }finally{
+    saveInfoBtn.disabled = false;
+    saveInfoBtn.textContent = 'Salva Informazioni';
+  }
 });
