@@ -126,7 +126,8 @@ nav a:hover::after{width:100%;}
   display:flex;align-items:center;justify-content:center;overflow:hidden;
   border-radius:16px 16px 0 0;flex-shrink:0;
 }
-.detail-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;}
+.detail-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;transition:opacity .18s ease;}
+.detail-img.fading{opacity:0;}
 .detail-img img{width:100%;height:100%;object-fit:cover;}
 .detail-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
@@ -335,6 +336,11 @@ nav a:hover::after{width:100%;}
 .prod-body{padding:18px;}
 .prod-body h3{font-size:1.05rem;margin-bottom:6px;}
 .prod-body .desc{color:var(--muted);font-size:.8rem;margin-bottom:14px;line-height:1.5;}
+.desc-preview{color:var(--muted);font-size:.78rem;line-height:1.5;margin:0 0 10px;}
+.desc-preview .read-more{color:var(--green);font-weight:600;white-space:nowrap;}
+.variant-hint{
+  display:block;color:var(--gold);font-size:.72rem;font-weight:600;margin:0 0 8px;
+}
 .stock-pill{
   display:inline-flex;align-items:center;gap:5px;
   background:linear-gradient(135deg, rgba(250,204,21,.18), rgba(250,204,21,.08));
@@ -379,7 +385,7 @@ nav a:hover::after{width:100%;}
   border:1px solid var(--line);
 }
 .tilt-icon{
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  cursor:pointer;
   transition:transform .15s ease-out, box-shadow .15s ease-out;
   transform-style:preserve-3d;
   will-change:transform;
@@ -427,27 +433,50 @@ footer{border-top:1px solid var(--line);padding:40px 5%;text-align:center;color:
   background:var(--surface);border-left:1px solid var(--line);z-index:99;
   transform:translateX(100%);transition:.35s cubic-bezier(.4,0,.2,1);
   display:flex;flex-direction:column;
+  box-shadow:-16px 0 40px -12px rgba(0,0,0,.5);
 }
 .cart-panel.open{transform:translateX(0);}
-.cart-head{padding:22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
-.cart-head h3{font-size:1.25rem;font-weight:700;}
-.cart-head button{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;}
-.cart-items{flex:1;overflow-y:auto;padding:8px 22px;}
-.cart-item{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--line);gap:10px;}
-.cart-item .name{font-size:.9rem;font-weight:600;}
-.cart-item .sub{color:var(--muted);font-size:.75rem;margin-top:3px;}
-.qty-ctrl{display:flex;align-items:center;gap:8px;margin-top:6px;}
-.qty-ctrl button{
-  width:22px;height:22px;border-radius:4px;background:var(--surface2);border:1px solid var(--line);
-  color:var(--text);cursor:pointer;font-size:.8rem;
+.cart-head{
+  padding:22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(135deg, var(--surface2), var(--surface));
 }
-.cart-item .remove-btn{background:none;border:none;color:#f87171;cursor:pointer;font-size:.75rem;font-weight:600;}
-.cart-empty{color:var(--muted);text-align:center;padding:60px 0;}
-.cart-foot{border-top:1px solid var(--line);padding:22px;}
+.cart-head h3{font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.cart-head h3::before{content:'🧾';font-size:1.1rem;}
+.cart-head button{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;transition:.2s;}
+.cart-head button:hover{color:#f87171;}
+.cart-items{flex:1;overflow-y:auto;padding:16px;}
+.cart-item{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  padding:14px;margin-bottom:10px;
+  background:var(--surface2);border:1px solid var(--line);border-radius:10px;
+  position:relative;
+}
+.cart-item:not(:last-child)::after{
+  content:'';position:absolute;left:14px;right:14px;bottom:-6px;
+  border-bottom:1px dashed var(--line);
+}
+.cart-item .name{font-size:.9rem;font-weight:600;}
+.cart-item .sub{color:var(--green);font-size:.78rem;margin-top:3px;font-weight:600;}
+.qty-ctrl{display:flex;align-items:center;gap:10px;margin-top:8px;}
+.qty-ctrl button{
+  width:24px;height:24px;border-radius:50%;background:var(--surface);border:1px solid var(--line);
+  color:var(--text);cursor:pointer;font-size:.85rem;transition:.2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.qty-ctrl button:hover{border-color:var(--green);color:var(--green);}
+.qty-ctrl span{font-weight:700;min-width:16px;text-align:center;}
+.cart-item .remove-btn{
+  background:none;border:none;color:#f87171;cursor:pointer;font-size:.72rem;font-weight:600;
+  flex-shrink:0;padding:4px 8px;border-radius:6px;transition:.2s;
+}
+.cart-item .remove-btn:hover{background:rgba(248,113,113,.12);}
+.cart-empty{color:var(--muted);text-align:center;padding:70px 20px;}
+.cart-empty::before{content:'🛒';display:block;font-size:2.6rem;margin-bottom:14px;opacity:.6;}
+.cart-foot{border-top:1px solid var(--line);padding:22px;background:var(--surface2);}
 .cart-row{display:flex;justify-content:space-between;margin-bottom:8px;color:var(--muted);font-size:.9rem;}
-.cart-total{display:flex;justify-content:space-between;margin-bottom:16px;font-weight:700;font-size:1.2rem;padding-top:10px;border-top:1px dashed var(--line);}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:16px;font-weight:800;font-size:1.3rem;padding-top:12px;border-top:1px dashed var(--line);color:var(--green);}
 .checkout-btn{width:100%;background:#25D366;border:none;color:#fff;padding:14px;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;}
-.checkout-btn:hover{background:#1ebe5a;}
+.checkout-btn:hover{background:#1ebe5a;transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(37,211,102,.4);}
 
 /* ---------- Ripple effect (تأثير الموجة عند الضغط) ---------- */
 .ripple-btn{position:relative;overflow:hidden;}
