@@ -1,7 +1,7 @@
 /* ============================================
    إعدادات عامة — WhatsApp والشركة
    ============================================ */
-const WHATSAPP_NUMBER = "393934020090";
+let WHATSAPP_NUMBER = "393934020090";
 const STORE_NAME = "Khalil Fedeltà";
 
 /* ============================================
@@ -158,7 +158,12 @@ track.addEventListener('touchend', dragEnd);
 
 track.addEventListener('click', e => {
   const btn = e.target.closest('.carousel-add');
-  if(btn){ addToCart(btn.dataset.id); return; }
+  if(btn){
+    const product = products.find(p => sameId(p.id, btn.dataset.id));
+    if(product && product.variants && product.variants.length > 0){ openDetailModal(btn.dataset.id); return; }
+    addToCart(btn.dataset.id);
+    return;
+  }
   const iconBig = e.target.closest('.icon-big');
   if(iconBig){
     const slide = iconBig.closest('.slide');
@@ -270,7 +275,13 @@ loadCategories();
 
 grid.addEventListener('click', e => {
   const btn = e.target.closest('.add-btn');
-  if(btn){ if(!btn.disabled) addToCart(btn.dataset.id); return; }
+  if(btn){
+    if(btn.disabled) return;
+    const product = products.find(p => sameId(p.id, btn.dataset.id));
+    if(product && product.variants && product.variants.length > 0){ openDetailModal(btn.dataset.id); return; }
+    addToCart(btn.dataset.id);
+    return;
+  }
   const card = e.target.closest('.prod-card');
   if(card){
     const id = card.querySelector('.prod-img').dataset.id;
@@ -339,7 +350,7 @@ function loadServices(){
   }
   db.collection('services').onSnapshot(
     snapshot => {
-      services = snapshot.empty ? [...defaultServices] : snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      services = snapshot.empty ? [...defaultServices] : snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(s => !s.disabled);
       renderServices();
     },
     () => renderServices()
@@ -409,7 +420,13 @@ searchInput.addEventListener('input', () => {
 
 searchResults.addEventListener('click', e => {
   const btn = e.target.closest('.add-btn');
-  if(btn){ if(!btn.disabled) addToCart(btn.dataset.id); return; }
+  if(btn){
+    if(btn.disabled) return;
+    const product = products.find(p => sameId(p.id, btn.dataset.id));
+    if(product && product.variants && product.variants.length > 0){ openDetailModal(btn.dataset.id); return; }
+    addToCart(btn.dataset.id);
+    return;
+  }
   const card = e.target.closest('.prod-card');
   if(card){
     const id = card.querySelector('.prod-img').dataset.id;
@@ -430,13 +447,14 @@ const cartTotalEl = document.getElementById('cartTotal');
 const cartCountEl = document.getElementById('cartCount');
 const checkoutBtn = document.getElementById('checkoutBtn');
 
-function addToCart(id){
+function addToCart(id, variant){
   const product = products.find(p => sameId(p.id, id));
   if(!product || product.outOfStock) return;
-  const existing = cart.find(item => sameId(item.id, id));
-  if(existing){ existing.qty += 1; } else { cart.push({...product, qty:1}); }
+  const variantKey = variant || null;
+  const existing = cart.find(item => sameId(item.id, id) && item.variant === variantKey);
+  if(existing){ existing.qty += 1; } else { cart.push({...product, qty:1, variant: variantKey}); }
   updateCartUI();
-  showToast(`${product.name} — Aggiunto al carrello ✓`);
+  showToast(`${product.name}${variantKey ? ' (' + variantKey + ')' : ''} — Aggiunto al carrello ✓`);
 }
 
 function openCart(){ cartPanel.classList.add('open'); overlay.classList.add('open'); }
@@ -452,18 +470,18 @@ function updateCartUI(){
   if(cart.length === 0){
     cartItemsEl.innerHTML = '<div class="cart-empty">Il carrello è vuoto.</div>';
   } else {
-    cartItemsEl.innerHTML = cart.map(item => `
+    cartItemsEl.innerHTML = cart.map((item, idx) => `
       <div class="cart-item">
         <div>
-          <div class="name">${item.icon || '🧴'} ${item.name}</div>
+          <div class="name">${item.icon || '🧴'} ${item.name}${item.variant ? ` <span style="color:var(--muted);font-weight:400;">(${item.variant})</span>` : ''}</div>
           <div class="sub">€${item.price} x ${item.qty} = €${item.price * item.qty}</div>
           <div class="qty-ctrl">
-            <button class="qty-minus" data-id="${item.id}">−</button>
+            <button class="qty-minus" data-idx="${idx}">−</button>
             <span>${item.qty}</span>
-            <button class="qty-plus" data-id="${item.id}">+</button>
+            <button class="qty-plus" data-idx="${idx}">+</button>
           </div>
         </div>
-        <button data-id="${item.id}" class="remove-btn">Rimuovi</button>
+        <button data-idx="${idx}" class="remove-btn">Rimuovi</button>
       </div>
     `).join('');
   }
@@ -474,18 +492,17 @@ function updateCartUI(){
 }
 
 cartItemsEl.addEventListener('click', e => {
-  const id = e.target.dataset.id;
-  if(!id) return;
+  const idxStr = e.target.dataset.idx;
+  if(idxStr === undefined) return;
+  const idx = parseInt(idxStr);
   if(e.target.classList.contains('remove-btn')){
-    cart = cart.filter(item => !sameId(item.id, id));
+    cart.splice(idx, 1);
   } else if(e.target.classList.contains('qty-plus')){
-    const item = cart.find(i => sameId(i.id, id));
-    if(item) item.qty += 1;
+    if(cart[idx]) cart[idx].qty += 1;
   } else if(e.target.classList.contains('qty-minus')){
-    const item = cart.find(i => sameId(i.id, id));
-    if(item){
-      item.qty -= 1;
-      if(item.qty <= 0) cart = cart.filter(i => !sameId(i.id, id));
+    if(cart[idx]){
+      cart[idx].qty -= 1;
+      if(cart[idx].qty <= 0) cart.splice(idx, 1);
     }
   }
   updateCartUI();
@@ -498,15 +515,57 @@ checkoutBtn.addEventListener('click', () => {
   }
   let message = `Ciao ${STORE_NAME}! 👋\nVorrei confermare il seguente ordine:\n\n`;
   cart.forEach(item => {
-    message += `• ${item.name} — Qtà: ${item.qty} x €${item.price} = €${item.qty * item.price}\n`;
+    message += `• ${item.name}${item.variant ? ' (' + item.variant + ')' : ''} — Qtà: ${item.qty} x €${item.price} = €${item.qty * item.price}\n`;
   });
   const total = cart.reduce((s,i) => s + i.qty * i.price, 0);
   message += `\n*Totale: €${total}*\n\nAttendo conferma disponibilità. Grazie!`;
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 });
 
-document.getElementById('whatsappFab').href =
-  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Ciao ' + STORE_NAME + '! Vorrei maggiori informazioni.')}`;
+function updateWhatsappFab(){
+  document.getElementById('whatsappFab').href =
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Ciao ' + STORE_NAME + '! Vorrei maggiori informazioni.')}`;
+}
+updateWhatsappFab();
+
+/* ============================================
+   معلومات الموقع (Chi Siamo، العنوان، واتساب، السوشيال) من Firebase
+   ============================================ */
+function loadSiteInfo(){
+  if(typeof db === 'undefined' || !db) return;
+  db.collection('siteInfo').doc('main').onSnapshot(doc => {
+    if(!doc.exists) return;
+    const d = doc.data();
+
+    if(d.whatsapp){
+      WHATSAPP_NUMBER = d.whatsapp;
+      updateWhatsappFab();
+    }
+
+    const aboutEl = document.getElementById('footerAbout');
+    if(d.about){
+      aboutEl.textContent = d.about;
+      aboutEl.style.display = 'block';
+    }
+
+    if(d.address){
+      document.getElementById('footerAddress').textContent = '📍 ' + d.address;
+    }
+    if(d.whatsapp){
+      document.getElementById('footerWhatsapp').textContent = '📞 WhatsApp: +' + d.whatsapp;
+    }
+
+    const socialEl = document.getElementById('footerSocial');
+    socialEl.innerHTML = '';
+    if(d.facebook){
+      socialEl.innerHTML += `<a href="${d.facebook}" target="_blank" rel="noopener" title="Facebook">📘</a>`;
+    }
+    if(d.instagram){
+      socialEl.innerHTML += `<a href="${d.instagram}" target="_blank" rel="noopener" title="Instagram">📷</a>`;
+    }
+  });
+}
+loadSiteInfo();
 
 /* ============================================
    قائمة الموبايل (الهامبرغر ☰) — بتتحط تحت الهيدر أيًا كان مكانك
@@ -549,6 +608,8 @@ const detailName = document.getElementById('detailName');
 const detailDesc = document.getElementById('detailDesc');
 const detailPrice = document.getElementById('detailPrice');
 const detailAddBtn = document.getElementById('detailAddBtn');
+const detailVariantField = document.getElementById('detailVariantField');
+const detailVariantSelect = document.getElementById('detailVariantSelect');
 
 let detailProduct = null;
 let detailImgIndex = 0;
@@ -569,6 +630,14 @@ function openDetailModal(id){
     detailDesc.insertAdjacentHTML('afterend', `<span class="stock-pill" id="detailLowStock">⚡ Rimangono ${product.quantity}</span>`);
   }
   detailPrice.innerHTML = `€${product.price}` + (product.oldPrice ? ` <span style="color:var(--muted);text-decoration:line-through;font-size:1rem;">€${product.oldPrice}</span>` : '');
+
+  if(product.variants && product.variants.length > 0){
+    detailVariantField.style.display = 'block';
+    detailVariantSelect.innerHTML = product.variants.map(v => `<option value="${v}">${v}</option>`).join('');
+  } else {
+    detailVariantField.style.display = 'none';
+    detailVariantSelect.innerHTML = '';
+  }
 
   if(product.badge && !product.outOfStock){
     detailBadge.style.display = 'inline-block';
@@ -630,7 +699,8 @@ detailNext.addEventListener('click', () => {
 
 detailAddBtn.addEventListener('click', () => {
   if(!detailProduct || detailProduct.outOfStock) return;
-  addToCart(detailProduct.id);
+  const selectedVariant = (detailProduct.variants && detailProduct.variants.length > 0) ? detailVariantSelect.value : null;
+  addToCart(detailProduct.id, selectedVariant);
 });
 
 /* ============================================
