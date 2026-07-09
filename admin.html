@@ -132,6 +132,28 @@
   .status-msg.error{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3);}
 
   @media(max-width:600px){ .form-grid{grid-template-columns:1fr;} }
+
+  .admin-tabs{
+    display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding-bottom:0;
+  }
+  .admin-tab-btn{
+    background:none;border:none;color:var(--muted);
+    padding:12px 18px;font-size:.9rem;font-weight:600;cursor:pointer;
+    border-bottom:2px solid transparent;transition:.2s;
+  }
+  .admin-tab-btn:hover{color:var(--text);}
+  .admin-tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
+  .admin-tab-content{display:none;}
+  .admin-tab-content.active{display:block;}
+
+  .variant-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .variant-chip{
+    display:flex;align-items:center;gap:6px;
+    background:var(--surface2);border:1px solid var(--line);
+    padding:6px 10px;border-radius:16px;font-size:.82rem;
+  }
+  .variant-chip button{background:none;border:none;color:#f87171;cursor:pointer;font-size:.85rem;padding:0;}
 </style>
 </head>
 <body>
@@ -168,113 +190,173 @@
 
   <div class="status-msg" id="statusMsg"></div>
 
-  <div class="form-card">
-    <h2>Aggiungi Nuova Categoria</h2>
-    <div class="form-grid">
-      <div class="field full">
-        <label>Nome categoria (es. Accessori Auto)</label>
-        <input type="text" id="catName" placeholder="Nome della nuova categoria">
-      </div>
-      <div class="field full">
-        <label>Emoji della categoria</label>
-        <input type="text" id="catIcon" placeholder="es. 🚗" maxlength="4">
-      </div>
-    </div>
-    <button class="primary-btn ripple-btn" id="addCatBtn" style="margin-top:16px;">Aggiungi Categoria</button>
-    <div class="cat-list" id="catList"></div>
+  <div class="admin-tabs">
+    <button class="admin-tab-btn active" data-tab="tabProdotti">📦 Prodotti</button>
+    <button class="admin-tab-btn" data-tab="tabServizi">🧰 Servizi</button>
+    <button class="admin-tab-btn" data-tab="tabCategorie">🗂️ Categorie</button>
+    <button class="admin-tab-btn" data-tab="tabChiSiamo">ℹ️ Chi Siamo</button>
   </div>
 
-  <div class="form-card">
-    <h2 id="servFormTitle">Aggiungi Nuovo Servizio</h2>
-    <input type="hidden" id="servEditId" value="">
-    <div class="form-grid">
-      <div class="field full">
-        <label>Nome del servizio</label>
-        <input type="text" id="servName" placeholder="es. Pulizia Giardino">
+  <!-- ===== TAB: PRODOTTI ===== -->
+  <div class="admin-tab-content active" id="tabProdotti">
+    <div class="form-card">
+      <h2 id="formTitle">Aggiungi Nuovo Prodotto</h2>
+      <input type="hidden" id="editId" value="">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Nome Prodotto</label>
+          <input type="text" id="fName" placeholder="es. Detersivo Multiuso">
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select id="fCat"></select>
+        </div>
+        <div class="field">
+          <label>Badge (opzionale)</label>
+          <select id="fBadge">
+            <option value="">Nessuno</option>
+            <option value="offerta">🟡 Offerta</option>
+            <option value="bestseller">🟢 Più Venduto</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prezzo attuale (€)</label>
+          <input type="number" id="fPrice" placeholder="es. 25" step="0.01">
+        </div>
+        <div class="field">
+          <label>Prezzo prima dell'offerta (opzionale)</label>
+          <input type="number" id="fOldPrice" placeholder="lascia vuoto se nessuna offerta" step="0.01">
+        </div>
+        <div class="field">
+          <label>Quantità disponibile (opzionale)</label>
+          <input type="number" id="fQuantity" placeholder="es. 10" min="0" step="1">
+        </div>
+        <div class="field full">
+          <label>Descrizione breve</label>
+          <textarea id="fDesc" placeholder="Descrizione breve del prodotto..."></textarea>
+        </div>
+        <div class="field full">
+          <label>Emoji (usata solo se non carichi foto)</label>
+          <input type="text" id="fIcon" placeholder="es. 🧴" maxlength="4">
+        </div>
+        <div class="field full">
+          <label>Varianti prodotto (es. profumazioni o colori diversi — opzionale)</label>
+          <div class="variant-list" id="variantList"></div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="variantInput" placeholder="es. Lavanda">
+            <button type="button" class="logout-btn" id="addVariantBtn" style="flex-shrink:0;">Aggiungi</button>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Foto del prodotto (fino a 4 immagini, prese dal tuo computer)</label>
+          <div class="gallery-preview" id="galleryPreview"></div>
+          <input type="file" id="fImages" accept="image/*" multiple>
+        </div>
+        <div class="field full">
+          <label class="checkbox-label">
+            <input type="checkbox" id="fOutOfStock">
+            Prodotto esaurito (non disponibile per l'acquisto)
+          </label>
+        </div>
       </div>
-      <div class="field">
-        <label>Emoji del servizio</label>
-        <input type="text" id="servIcon" placeholder="es. 🌿" maxlength="4">
-      </div>
-      <div class="field">
-        <label>Prezzo o etichetta</label>
-        <input type="text" id="servPriceLabel" placeholder="es. A partire da €30">
-      </div>
-      <div class="field full">
-        <label>Descrizione breve</label>
-        <textarea id="servDesc" placeholder="Descrizione breve del servizio..."></textarea>
+      <div style="margin-top:20px;display:flex;gap:12px;">
+        <button class="primary-btn ripple-btn" id="saveBtn" style="flex:1;">Salva Prodotto</button>
+        <button class="logout-btn" id="cancelEditBtn" style="display:none;">Annulla</button>
       </div>
     </div>
-    <div style="margin-top:16px;display:flex;gap:12px;">
-      <button class="primary-btn ripple-btn" id="saveServBtn" style="flex:1;">Salva Servizio</button>
-      <button class="logout-btn" id="cancelServEditBtn" style="display:none;">Annulla</button>
+
+    <div class="list-title">Prodotti Attuali</div>
+    <div class="field" style="margin-bottom:18px;">
+      <input type="text" id="adminSearch" placeholder="🔍 Cerca un prodotto per nome...">
     </div>
-    <div class="admin-list" id="servList" style="margin-top:20px;"></div>
+    <div class="admin-list" id="adminList"></div>
   </div>
 
-  <div class="form-card">
-    <h2 id="formTitle">Aggiungi Nuovo Prodotto</h2>
-    <input type="hidden" id="editId" value="">
-    <div class="form-grid">
-      <div class="field full">
-        <label>Nome Prodotto</label>
-        <input type="text" id="fName" placeholder="es. Detersivo Multiuso">
+  <!-- ===== TAB: SERVIZI ===== -->
+  <div class="admin-tab-content" id="tabServizi">
+    <div class="form-card">
+      <h2 id="servFormTitle">Aggiungi Nuovo Servizio</h2>
+      <input type="hidden" id="servEditId" value="">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Nome del servizio</label>
+          <input type="text" id="servName" placeholder="es. Pulizia Giardino">
+        </div>
+        <div class="field">
+          <label>Emoji del servizio</label>
+          <input type="text" id="servIcon" placeholder="es. 🌿" maxlength="4">
+        </div>
+        <div class="field">
+          <label>Prezzo o etichetta</label>
+          <input type="text" id="servPriceLabel" placeholder="es. A partire da €30">
+        </div>
+        <div class="field full">
+          <label>Descrizione breve</label>
+          <textarea id="servDesc" placeholder="Descrizione breve del servizio..."></textarea>
+        </div>
+        <div class="field full">
+          <label class="checkbox-label">
+            <input type="checkbox" id="servDisabled">
+            Servizio disattivato (nascosto dal sito)
+          </label>
+        </div>
       </div>
-      <div class="field">
-        <label>Categoria</label>
-        <select id="fCat"></select>
+      <div style="margin-top:16px;display:flex;gap:12px;">
+        <button class="primary-btn ripple-btn" id="saveServBtn" style="flex:1;">Salva Servizio</button>
+        <button class="logout-btn" id="cancelServEditBtn" style="display:none;">Annulla</button>
       </div>
-      <div class="field">
-        <label>Badge (opzionale)</label>
-        <select id="fBadge">
-          <option value="">Nessuno</option>
-          <option value="offerta">🟡 Offerta</option>
-          <option value="bestseller">🟢 Più Venduto</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Prezzo attuale (€)</label>
-        <input type="number" id="fPrice" placeholder="es. 25" step="0.01">
-      </div>
-      <div class="field">
-        <label>Prezzo prima dell'offerta (opzionale)</label>
-        <input type="number" id="fOldPrice" placeholder="lascia vuoto se nessuna offerta" step="0.01">
-      </div>
-      <div class="field">
-        <label>Quantità disponibile (opzionale)</label>
-        <input type="number" id="fQuantity" placeholder="es. 10" min="0" step="1">
-      </div>
-      <div class="field full">
-        <label>Descrizione breve</label>
-        <textarea id="fDesc" placeholder="Descrizione breve del prodotto..."></textarea>
-      </div>
-      <div class="field full">
-        <label>Emoji (usata solo se non carichi foto)</label>
-        <input type="text" id="fIcon" placeholder="es. 🧴" maxlength="4">
-      </div>
-      <div class="field full">
-        <label>Foto del prodotto (fino a 4 immagini, prese dal tuo computer)</label>
-        <div class="gallery-preview" id="galleryPreview"></div>
-        <input type="file" id="fImages" accept="image/*" multiple>
-      </div>
-      <div class="field full">
-        <label class="checkbox-label">
-          <input type="checkbox" id="fOutOfStock">
-          Prodotto esaurito (non disponibile per l'acquisto)
-        </label>
-      </div>
-    </div>
-    <div style="margin-top:20px;display:flex;gap:12px;">
-      <button class="primary-btn ripple-btn" id="saveBtn" style="flex:1;">Salva Prodotto</button>
-      <button class="logout-btn" id="cancelEditBtn" style="display:none;">Annulla</button>
+      <div class="admin-list" id="servList" style="margin-top:20px;"></div>
     </div>
   </div>
 
-  <div class="list-title">Prodotti Attuali</div>
-  <div class="field" style="margin-bottom:18px;">
-    <input type="text" id="adminSearch" placeholder="🔍 Cerca un prodotto per nome...">
+  <!-- ===== TAB: CATEGORIE ===== -->
+  <div class="admin-tab-content" id="tabCategorie">
+    <div class="form-card">
+      <h2>Aggiungi Nuova Categoria</h2>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Nome categoria (es. Accessori Auto)</label>
+          <input type="text" id="catName" placeholder="Nome della nuova categoria">
+        </div>
+        <div class="field full">
+          <label>Emoji della categoria</label>
+          <input type="text" id="catIcon" placeholder="es. 🚗" maxlength="4">
+        </div>
+      </div>
+      <button class="primary-btn ripple-btn" id="addCatBtn" style="margin-top:16px;">Aggiungi Categoria</button>
+      <div class="cat-list" id="catList"></div>
+    </div>
   </div>
-  <div class="admin-list" id="adminList"></div>
+
+  <!-- ===== TAB: CHI SIAMO ===== -->
+  <div class="admin-tab-content" id="tabChiSiamo">
+    <div class="form-card">
+      <h2>Informazioni sul Negozio</h2>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Testo "Chi Siamo"</label>
+          <textarea id="infoAbout" placeholder="Racconta chi siete e cosa offrite..." style="min-height:110px;"></textarea>
+        </div>
+        <div class="field full">
+          <label>Indirizzo</label>
+          <input type="text" id="infoAddress" placeholder="es. Via Giuseppe Garibaldi 41, Pogliano Milanese (MI)">
+        </div>
+        <div class="field">
+          <label>Numero WhatsApp (con prefisso, senza +)</label>
+          <input type="text" id="infoWhatsapp" placeholder="es. 393934020090">
+        </div>
+        <div class="field">
+          <label>Link Facebook (opzionale)</label>
+          <input type="text" id="infoFacebook" placeholder="https://facebook.com/...">
+        </div>
+        <div class="field full">
+          <label>Link Instagram (opzionale)</label>
+          <input type="text" id="infoInstagram" placeholder="https://instagram.com/...">
+        </div>
+      </div>
+      <button class="primary-btn ripple-btn" id="saveInfoBtn" style="margin-top:16px;">Salva Informazioni</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
