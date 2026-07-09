@@ -100,8 +100,10 @@
     <img src="/logo.png" class="logo-badge" alt="Khalil Fedeltà">
     <div>Khalil<span class="fedelta">Fedeltà</span></div>
   </div>
-  <p>📍 Via Giuseppe Garibaldi 41, Pogliano Milanese (MI)</p>
-  <p>📞 WhatsApp: +39 393 402 0090</p>
+  <p id="footerAbout" class="footer-about" style="display:none;"></p>
+  <p id="footerAddress">📍 Via Giuseppe Garibaldi 41, Pogliano Milanese (MI)</p>
+  <p id="footerWhatsapp">📞 WhatsApp: +39 393 402 0090</p>
+  <div class="footer-social" id="footerSocial"></div>
   <p style="margin-top:10px;">© 2026 Khalil Fedeltà — Tutti i diritti riservati</p>
   <p style="margin-top:14px;"><a href="/admin.html" style="color:var(--muted);font-size:.75rem;text-decoration:underline;">Gestione Prodotti</a></p>
 </footer>
@@ -137,6 +139,10 @@
     <span class="mini-badge" id="detailBadge" style="display:none;"></span>
     <h3 id="detailName"></h3>
     <p class="detail-desc" id="detailDesc"></p>
+    <div class="field" id="detailVariantField" style="display:none;margin-bottom:16px;">
+      <label>Scegli un'opzione</label>
+      <select id="detailVariantSelect"></select>
+    </div>
     <div class="detail-price-row">
       <span class="detail-price" id="detailPrice"></span>
       <button class="add-btn ripple-btn" id="detailAddBtn">Aggiungi</button>
