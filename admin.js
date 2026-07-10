@@ -583,6 +583,7 @@ const infoAddress = document.getElementById('infoAddress');
 const infoWhatsapp = document.getElementById('infoWhatsapp');
 const infoFacebook = document.getElementById('infoFacebook');
 const infoInstagram = document.getElementById('infoInstagram');
+const infoWebsite = document.getElementById('infoWebsite');
 const saveInfoBtn = document.getElementById('saveInfoBtn');
 
 async function loadSiteInfo(){
@@ -595,6 +596,7 @@ async function loadSiteInfo(){
       infoWhatsapp.value = d.whatsapp || '';
       infoFacebook.value = d.facebook || '';
       infoInstagram.value = d.instagram || '';
+      infoWebsite.value = d.website || '';
     }
   }catch(err){
     console.error('تعذر تحميل معلومات الموقع:', err);
@@ -608,6 +610,7 @@ saveInfoBtn.addEventListener('click', async () => {
     whatsapp: infoWhatsapp.value.trim(),
     facebook: infoFacebook.value.trim(),
     instagram: infoInstagram.value.trim(),
+    website: infoWebsite.value.trim(),
   };
   saveInfoBtn.disabled = true;
   saveInfoBtn.textContent = 'جاري الحفظ...';
@@ -622,3 +625,25 @@ saveInfoBtn.addEventListener('click', async () => {
     saveInfoBtn.textContent = 'Salva Informazioni';
   }
 });
+
+/* ============================================
+   دوس Enter في أي خانة نصية يشتغل زي ما تدوس الزرار بالماوس
+   ============================================ */
+function bindEnterToClick(inputEl, btnEl){
+  if(!inputEl || !btnEl) return;
+  inputEl.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      btnEl.click();
+    }
+  });
+}
+
+bindEnterToClick(loginEmail, loginBtn);
+bindEnterToClick(loginPassword, loginBtn);
+
+[fName, fPrice, fOldPrice, fQuantity, fIcon].forEach(el => bindEnterToClick(el, saveBtn));
+bindEnterToClick(catName, addCatBtn);
+bindEnterToClick(catIcon, addCatBtn);
+[servName, servIcon, servPriceLabel].forEach(el => bindEnterToClick(el, saveServBtn));
+[infoAddress, infoWhatsapp, infoFacebook, infoInstagram, infoWebsite].forEach(el => bindEnterToClick(el, saveInfoBtn));
