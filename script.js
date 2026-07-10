@@ -383,9 +383,9 @@ function initTiltIcons(){
       const y = e.clientY - rect.top;
       const midX = rect.width / 2;
       const midY = rect.height / 2;
-      const rotateY = ((x - midX) / midX) * 18;
-      const rotateX = -((y - midY) / midY) * 18;
-      el.style.transform = `perspective(400px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.15)`;
+      const rotateY = ((x - midX) / midX) * 8;
+      const rotateX = -((y - midY) / midY) * 8;
+      el.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
     });
     el.addEventListener('mouseleave', () => {
       el.style.transform = '';
@@ -570,6 +570,9 @@ function loadSiteInfo(){
     }
     if(d.instagram){
       socialEl.innerHTML += `<a href="${d.instagram}" target="_blank" rel="noopener" title="Instagram">📷</a>`;
+    }
+    if(d.website){
+      socialEl.innerHTML += `<a href="${d.website}" target="_blank" rel="noopener" title="Sito Web">🔗</a>`;
     }
   });
 }
