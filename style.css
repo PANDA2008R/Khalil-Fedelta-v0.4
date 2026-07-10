@@ -128,7 +128,7 @@ nav a:hover::after{width:100%;}
 }
 .detail-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;transition:opacity .18s ease;}
 .detail-img.fading{opacity:0;}
-.detail-img img{width:100%;height:100%;object-fit:cover;}
+.detail-img img{width:100%;height:100%;object-fit:contain;}
 .detail-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
   width:38px;height:38px;border-radius:50%;
@@ -143,6 +143,7 @@ nav a:hover::after{width:100%;}
 .detail-body h3{font-size:1.4rem;margin:12px 0 10px;}
 .detail-desc{color:var(--muted);font-size:.95rem;line-height:1.7;margin-bottom:20px;}
 .detail-price-row{display:flex;align-items:center;justify-content:space-between;}
+.iva-note{color:var(--muted);font-size:.72rem;margin-top:8px;text-align:center;}
 #detailVariantField label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;}
 #detailVariantSelect{
   width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
@@ -309,7 +310,7 @@ nav a:hover::after{width:100%;}
   display:flex;align-items:center;justify-content:center;font-size:2.8rem;
   border-bottom:1px solid var(--line);position:relative;overflow:hidden;
 }
-.prod-img img{width:100%;height:100%;object-fit:cover;}
+.prod-img img{width:100%;height:100%;object-fit:contain;}
 .mini-badge{
   position:absolute;top:10px;left:10px;font-size:.65rem;font-weight:700;
   padding:4px 10px;border-radius:12px;text-transform:uppercase;
