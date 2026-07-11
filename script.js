@@ -66,7 +66,10 @@ let slideIndex = 0;
 let autoTimer = null;
 
 function buildCarousel(){
-  featured = products.filter(p => p.badge && !p.outOfStock).slice(0, 4);
+  const curated = products.filter(p => p.featuredCarousel && !p.outOfStock);
+  featured = curated.length > 0
+    ? curated.slice(0, 8)
+    : products.filter(p => p.badge && !p.outOfStock).slice(0, 8);
   track.innerHTML = '';
   dotsWrap.innerHTML = '';
   slideIndex = 0;
@@ -451,12 +454,13 @@ const cartTotalEl = document.getElementById('cartTotal');
 const cartCountEl = document.getElementById('cartCount');
 const checkoutBtn = document.getElementById('checkoutBtn');
 
-function addToCart(id, variant){
+function addToCart(id, variant, qty){
   const product = products.find(p => sameId(p.id, id));
   if(!product || product.outOfStock) return;
+  const addQty = qty && qty > 0 ? qty : 1;
   const variantKey = variant || null;
   const existing = cart.find(item => sameId(item.id, id) && item.variant === variantKey);
-  if(existing){ existing.qty += 1; } else { cart.push({...product, qty:1, variant: variantKey}); }
+  if(existing){ existing.qty += addQty; } else { cart.push({...product, qty:addQty, variant: variantKey}); }
   updateCartUI();
   showToast(`${product.name}${variantKey ? ' (' + variantKey + ')' : ''} — Aggiunto al carrello ✓`);
 }
@@ -517,12 +521,21 @@ checkoutBtn.addEventListener('click', () => {
     alert('Il carrello è vuoto. Aggiungi almeno un prodotto prima di confermare.');
     return;
   }
-  let message = `Ciao ${STORE_NAME}! 👋\nVorrei confermare il seguente ordine:\n\n`;
-  cart.forEach(item => {
-    message += `• ${item.name}${item.variant ? ' (' + item.variant + ')' : ''} — Qtà: ${item.qty} x €${item.price} = €${item.qty * item.price}\n`;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('it-IT');
+  const timeStr = now.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+
+  let message = `🧾 *NUOVO ORDINE — ${STORE_NAME}*\n`;
+  message += `📅 ${dateStr} · ${timeStr}\n`;
+  message += `━━━━━━━━━━━━━━━\n\n`;
+  cart.forEach((item, idx) => {
+    message += `${idx + 1}. *${item.name}*${item.variant ? ` (${item.variant})` : ''}\n`;
+    message += `   Qtà: ${item.qty} × €${item.price} = €${(item.qty * item.price).toFixed(2)}\n\n`;
   });
   const total = cart.reduce((s,i) => s + i.qty * i.price, 0);
-  message += `\n*Totale: €${total}*\n\nAttendo conferma disponibilità. Grazie!`;
+  message += `━━━━━━━━━━━━━━━\n`;
+  message += `💰 *Totale: €${total.toFixed(2)}* (IVA inclusa)\n\n`;
+  message += `Attendo conferma di disponibilità e tempi di consegna. Grazie! 🙏`;
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 });
 
@@ -620,16 +633,34 @@ const detailDesc = document.getElementById('detailDesc');
 const detailPrice = document.getElementById('detailPrice');
 const detailAddBtn = document.getElementById('detailAddBtn');
 const detailVariantField = document.getElementById('detailVariantField');
-const detailVariantSelect = document.getElementById('detailVariantSelect');
+const detailVariantChips = document.getElementById('detailVariantChips');
+const detailQtyMinus = document.getElementById('detailQtyMinus');
+const detailQtyPlus = document.getElementById('detailQtyPlus');
+const detailQtyValue = document.getElementById('detailQtyValue');
 
 let detailProduct = null;
 let detailImgIndex = 0;
+let detailSelectedVariant = null;
+let detailQty = 1;
+
+function updateDetailQtyDisplay(){
+  detailQtyValue.textContent = detailQty;
+}
+detailQtyMinus.addEventListener('click', () => {
+  if(detailQty > 1){ detailQty--; updateDetailQtyDisplay(); }
+});
+detailQtyPlus.addEventListener('click', () => {
+  detailQty++; updateDetailQtyDisplay();
+});
 
 function openDetailModal(id){
   const product = products.find(p => sameId(p.id, id));
   if(!product) return;
   detailProduct = product;
   detailImgIndex = 0;
+  detailQty = 1;
+  detailSelectedVariant = null;
+  updateDetailQtyDisplay();
   renderDetailImage();
 
   detailName.textContent = product.name;
@@ -644,11 +675,12 @@ function openDetailModal(id){
 
   if(product.variants && product.variants.length > 0){
     detailVariantField.style.display = 'block';
-    detailVariantSelect.innerHTML = `<option value="" disabled selected>-- Seleziona una profumazione/opzione --</option>` +
-      product.variants.map(v => `<option value="${v}">${v}</option>`).join('');
+    detailVariantChips.innerHTML = product.variants.map(v =>
+      `<button type="button" class="variant-chip-btn" data-variant="${v}">${v}</button>`
+    ).join('');
   } else {
     detailVariantField.style.display = 'none';
-    detailVariantSelect.innerHTML = '';
+    detailVariantChips.innerHTML = '';
   }
 
   if(product.badge && !product.outOfStock){
@@ -713,16 +745,22 @@ detailNext.addEventListener('click', () => {
   renderDetailImage();
 });
 
+detailVariantChips.addEventListener('click', (e) => {
+  const btn = e.target.closest('.variant-chip-btn');
+  if(!btn) return;
+  detailSelectedVariant = btn.dataset.variant;
+  detailVariantChips.querySelectorAll('.variant-chip-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+});
+
 detailAddBtn.addEventListener('click', () => {
   if(!detailProduct || detailProduct.outOfStock) return;
   const hasVariants = detailProduct.variants && detailProduct.variants.length > 0;
-  const selectedVariant = hasVariants ? detailVariantSelect.value : null;
-  if(hasVariants && !selectedVariant){
-    detailVariantSelect.style.borderColor = '#f87171';
+  if(hasVariants && !detailSelectedVariant){
     showToast('Seleziona prima un\'opzione ⚠️');
     return;
   }
-  addToCart(detailProduct.id, selectedVariant);
+  addToCart(detailProduct.id, detailSelectedVariant, detailQty);
 });
 
 /* ============================================
