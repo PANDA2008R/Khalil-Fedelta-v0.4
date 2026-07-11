@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Khalil Fedeltà — Pulizia, Macchine e Prodotti Professionali</title>
+<meta name="description" content="Servizi di pulizia a domicilio, macchine, attrezzi e prodotti professionali a Pogliano Milanese. Ordina facilmente su WhatsApp.">
+<meta property="og:title" content="Khalil Fedeltà — Pulizia Professionale">
+<meta property="og:description" content="Servizi a domicilio, macchine, attrezzi e prodotti per la pulizia — tutto in un unico negozio.">
+<meta property="og:image" content="/logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Khalil Fedeltà — Pulizia Professionale">
+<meta name="twitter:description" content="Servizi a domicilio, macchine, attrezzi e prodotti per la pulizia.">
+<meta name="twitter:image" content="/logo.png">
 <link rel="icon" type="image/png" href="/logo.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -141,7 +150,15 @@
     <p class="detail-desc" id="detailDesc"></p>
     <div class="field" id="detailVariantField" style="display:none;margin-bottom:16px;">
       <label>🌸 Questo prodotto ha diverse opzioni — scegline una prima di aggiungere</label>
-      <select id="detailVariantSelect"></select>
+      <div class="variant-chips" id="detailVariantChips"></div>
+    </div>
+    <div class="qty-stepper-row">
+      <span class="qty-stepper-label">Quantità</span>
+      <div class="qty-stepper">
+        <button type="button" id="detailQtyMinus">−</button>
+        <span id="detailQtyValue">1</span>
+        <button type="button" id="detailQtyPlus">+</button>
+      </div>
     </div>
     <div class="detail-price-row">
       <span class="detail-price" id="detailPrice"></span>
