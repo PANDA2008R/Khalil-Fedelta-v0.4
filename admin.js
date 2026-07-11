@@ -352,6 +352,7 @@ const fQuantity = document.getElementById('fQuantity');
 const fDesc = document.getElementById('fDesc');
 const fIcon = document.getElementById('fIcon');
 const fOutOfStock = document.getElementById('fOutOfStock');
+const fFeaturedCarousel = document.getElementById('fFeaturedCarousel');
 const saveBtn = document.getElementById('saveBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const formTitle = document.getElementById('formTitle');
@@ -403,6 +404,7 @@ function resetForm(){
   fDesc.value = '';
   fIcon.value = '';
   fOutOfStock.checked = false;
+  fFeaturedCarousel.checked = false;
   currentImages = [];
   currentVariants = [];
   renderVariantList();
@@ -433,6 +435,7 @@ saveBtn.addEventListener('click', async () => {
     desc: fDesc.value.trim(),
     icon: fIcon.value.trim() || '🧴',
     outOfStock: fOutOfStock.checked,
+    featuredCarousel: fFeaturedCarousel.checked,
     variants: [...currentVariants],
   };
 
@@ -498,7 +501,7 @@ function renderAdminList(){
     row.innerHTML = `
       <div class="thumb">${thumb}</div>
       <div class="info">
-        <h4>${p.name}${p.outOfStock ? ' <span style="color:#f87171;">(Esaurito)</span>' : ''}</h4>
+        <h4>${p.featuredCarousel ? '⭐ ' : ''}${p.name}${p.outOfStock ? ' <span style="color:#f87171;">(Esaurito)</span>' : ''}</h4>
         <span>${catLabel(p.cat)} · €${p.price}${p.oldPrice ? ` (كان €${p.oldPrice})` : ''}${p.badge ? ' · ' + (p.badge === 'offerta' ? 'عرض' : 'الأكثر مبيعًا') : ''}${imgCount > 1 ? ` · ${imgCount} صور` : ''}${(p.quantity !== null && p.quantity !== undefined) ? ` · الكمية: ${p.quantity}` : ''}</span>
       </div>
       <div class="row-actions">
@@ -539,6 +542,7 @@ adminList.addEventListener('click', async (e) => {
     fDesc.value = p.desc || '';
     fIcon.value = p.icon || '';
     fOutOfStock.checked = !!p.outOfStock;
+    fFeaturedCarousel.checked = !!p.featuredCarousel;
     currentVariants = p.variants ? [...p.variants] : [];
     renderVariantList();
     currentImages = p.images ? [...p.images] : (p.image ? [p.image] : []);
@@ -626,9 +630,7 @@ saveInfoBtn.addEventListener('click', async () => {
   }
 });
 
-/* ============================================
-   دوس Enter في أي خانة نصية يشتغل زي ما تدوس الزرار بالماوس
-   ============================================ */
+
 function bindEnterToClick(inputEl, btnEl){
   if(!inputEl || !btnEl) return;
   inputEl.addEventListener('keydown', (e) => {
